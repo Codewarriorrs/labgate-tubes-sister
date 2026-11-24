@@ -1,0 +1,505 @@
+openapi: 3.0.3
+info:
+  title: LabGate Integrated API
+  version: 1.0.0
+  description: >
+    Dokumentasi resmi REST API LabGate - Sistem Terintegrasi Pintu Laboratorium.
+    Mencakup antarmuka web pengguna (mahasiswa, dosen, admin) dan komunikasi antar-service
+    (Gateway lokal ke Cloud) dengan 4 metode HTTP (GET, POST, PUT, DELETE).
+servers:
+  - url: http://localhost:3000
+    description: Server Cloud Lokal
+  - url: https://labgate.vercel.app
+    description: Server Cloud Production (Vercel)
+
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: labgate_token
+      description: Token JWT sesi cookie HTTP-only untuk pengguna web.
+    GatewayBearerAuth:
+      type: http
+      scheme: bearer
+      description: API Key Gateway dalam format Bearer Token.
+
+  schemas:
+    ApiResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operasi berhasil
+        data:
+          type: object
+          nullable: true
+        error:
+          type: object
+          nullable: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: usr_mhs_01
+        name:
+          type: string
+          example: Muhammad Isya Asyhari
+        email:
+          type: string
+          example: isya.asyhari@students.undip.ac.id
+        role:
+          type: string
+          enum: [mahasiswa, dosen, admin]
+          example: mahasiswa
+        department:
+          type: string
+          example: Teknik Komputer
+        nim:
+          type: string
+          example: 21120124130051
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          example: lab-01
+        code:
+          type: string
+          example: lab-01
+        name:
+          type: string
+          example: Laboratorium Rekayasa Perangkat Lunak & Sistem Terintegrasi
+        capacity:
+          type: integer
+          example: 35
+        description:
+          type: string
+          example: Gedung D Lantai 3 Fakultas Teknik Undip
+        isOnline:
+          type: boolean
+          example: true
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          example: bkg_aktif_01
+        userId:
+          type: string
+          example: usr_mhs_01
+        userName:
+          type: string
+          example: Muhammad Isya Asyhari
+        roomId:
+          type: string
+          example: lab-01
+        roomName:
+          type: string
+          example: Laboratorium Rekayasa Perangkat Lunak & Sistem Terintegrasi
+        purpose:
+          type: string
+          example: Pengujian simulasi MQTT firmware ESP32
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [menunggu, disetujui, ditolak, dibatalkan]
+          example: disetujui
+        qrToken:
+          type: string
+          nullable: true
+
+paths:
+  /api/health:
+    get:
+      summary: Health check service cloud
+      responses:
+        '200':
+          description: Status kesehatan sistem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /api/auth/register:
+    post:
+      summary: Registrasi pengguna baru
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, department]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                department:
+                  type: string
+                nim:
+                  type: string
+                role:
+                  type: string
+                  enum: [mahasiswa, dosen, admin]
+      responses:
+        '201':
+          description: Pengguna berhasil didaftarkan
+        '409':
+          description: Email sudah terdaftar
+
+  /api/auth/login:
+    post:
+      summary: Autentikasi pengguna (Mahasiswa, Dosen, Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: isya.asyhari@students.undip.ac.id
+                password:
+                  type: string
+                  example: Semarang2026!
+      responses:
+        '200':
+          description: Login berhasil, cookie token disetel
+        '401':
+          description: Kredensial tidak valid
+
+  /api/auth/logout:
+    post:
+      summary: Keluar dari sesi
+      responses:
+        '200':
+          description: Sesi diakhiri
+
+  /api/auth/me:
+    get:
+      summary: Ambil profil pengguna yang sedang login
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Profil pengguna aktif
+        '401':
+          description: Belum terautentikasi
+
+  /api/rooms:
+    get:
+      summary: Daftar semua ruangan laboratorium
+      responses:
+        '200':
+          description: Daftar ruangan laboratorium
+    post:
+      summary: Daftarkan ruangan baru (Admin)
+      security:
+        - SessionCookie: []
+      responses:
+        '201':
+          description: Ruangan berhasil dibuat
+        '403':
+          description: Hanya admin yang diizinkan
+
+  /api/rooms/{id}:
+    get:
+      summary: Detail ruangan berdasarkan ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detail ruangan
+    put:
+      summary: Perbarui data ruangan (Admin)
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ruangan diperbarui
+    delete:
+      summary: Hapus ruangan (Admin)
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ruangan dihapus
+
+  /api/rooms/{id}/remote-unlock:
+    post:
+      summary: Buka pintu jarak jauh (Dosen/Admin)
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Perintah dimasukkan ke antrean gateway
+
+  /api/bookings:
+    get:
+      summary: Daftar permohonan peminjaman
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Daftar booking
+    post:
+      summary: Buat peminjaman baru (Pencegahan bentrok aktif)
+      security:
+        - SessionCookie: []
+      responses:
+        '201':
+          description: Permohonan booking terkirim
+        '409':
+          description: Jadwal bentrok dengan peminjaman lain
+
+  /api/bookings/{id}:
+    get:
+      summary: Detail booking
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detail booking
+    put:
+      summary: Ubah jadwal/keperluan booking (Hanya saat status menunggu)
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking diperbarui
+    delete:
+      summary: Batalkan booking
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking dibatalkan
+
+  /api/bookings/{id}/decision:
+    put:
+      summary: Setujui atau tolak booking (Dosen/Admin)
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Keputusan disimpan dan tiket QR diterbitkan jika disetujui
+
+  /api/cards:
+    get:
+      summary: Daftar kartu KTM RFID
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Daftar kartu
+    post:
+      summary: Daftarkan kartu KTM baru (UID disimpan sebagai Hash)
+      security:
+        - SessionCookie: []
+      responses:
+        '201':
+          description: Kartu terdaftar
+
+  /api/cards/{id}:
+    delete:
+      summary: Hapus pendaftaran kartu
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Kartu dihapus
+
+  /api/access-logs:
+    get:
+      summary: Ambil log audit akses pintu
+      security:
+        - SessionCookie: []
+      responses:
+        '200':
+          description: Riwayat event akses
+
+  # ==========================================
+  # ENDPOINT KOMUNIKASI ANTAR-SERVICE GATEWAY
+  # ==========================================
+  /api/gateway/snapshot:
+    get:
+      summary: Ambil snapshot ketersediaan & public key untuk mode offline (Gateway)
+      security:
+        - GatewayBearerAuth: []
+      parameters:
+        - name: since
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: ISO timestamp untuk sinkronisasi inkremental
+      responses:
+        '200':
+          description: Snapshot berhasil diambil
+        '401':
+          description: Bearer token API Key tidak ditemukan
+        '403':
+          description: API Key tidak valid
+
+  /api/gateway/logs:
+    post:
+      summary: Kirim riwayat log akses dari outbox SQLite secara idempoten (Gateway)
+      security:
+        - GatewayBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [logs]
+              properties:
+                logs:
+                  type: array
+                  items:
+                    type: object
+                    required: [eventId, roomCode, method, identifier, result, timestamp]
+                    properties:
+                      eventId:
+                        type: string
+                        format: uuid
+                      roomCode:
+                        type: string
+                      method:
+                        type: string
+                        enum: [rfid, qr, manual_pin, remote_unlock]
+                      identifier:
+                        type: string
+                      result:
+                        type: string
+                        enum: [granted, denied]
+                      timestamp:
+                        type: string
+                        format: date-time
+      responses:
+        '200':
+          description: Log berhasil diproses secara idempoten
+
+  /api/gateway/heartbeat:
+    put:
+      summary: Kirim status diagnostik & detak jantung (Gateway)
+      security:
+        - GatewayBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roomCode]
+              properties:
+                roomCode:
+                  type: string
+                version:
+                  type: string
+                queueCount:
+                  type: integer
+                lastSync:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Heartbeat diterima
+
+  /api/gateway/commands:
+    get:
+      summary: Ambil antrean perintah aktif dari cloud (Gateway)
+      security:
+        - GatewayBearerAuth: []
+      responses:
+        '200':
+          description: Antrean perintah
+
+  /api/gateway/commands/{id}:
+    delete:
+      summary: Konfirmasi bahwa perintah telah dieksekusi dan hapus dari antrean (Gateway)
+      security:
+        - GatewayBearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Perintah dikonfirmasi dan dihapus

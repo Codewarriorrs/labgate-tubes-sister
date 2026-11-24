@@ -1,0 +1,246 @@
+{
+  "info": {
+    "_postman_id": "labgate-collection-semarang-2026",
+    "name": "LabGate API Collection (Alur Berurutan)",
+    "description": "Koleksi Postman resmi untuk pengujian alur terintegrasi LabGate: Mahasiswa Booking -> Dosen Approve -> Gateway Snapshot -> Outbox Logs -> Heartbeat -> Remote Unlock -> Delete Command -> Gateway Kiosk.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Health Check Cloud",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "02. Login Mahasiswa",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.expect(jsonData.success).to.be.true;"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "03. Buat Permohonan Booking Baru",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.success && jsonData.data) {",
+              "  pm.environment.set('bookingId', jsonData.data.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"roomId\": \"lab-01\",\n  \"purpose\": \"Pengujian Integrasi MQTT dan Validasi Kartu KTM\",\n  \"startTime\": \"2026-11-25T09:00:00.000Z\",\n  \"endTime\": \"2026-11-25T11:00:00.000Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/bookings",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "bookings"]
+        }
+      }
+    },
+    {
+      "name": "04. Login Dosen / Admin",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{dosenEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "05. Setujui Booking & Terbitkan Tiket QR",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"disetujui\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/decision",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "bookings", "{{bookingId}}", "decision"]
+        }
+      }
+    },
+    {
+      "name": "06. Gateway: Ambil Snapshot Offline (GET)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{gatewayApiKey}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/gateway/snapshot",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "gateway", "snapshot"]
+        }
+      }
+    },
+    {
+      "name": "07. Gateway: Kirim Outbox Log Akses (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{gatewayApiKey}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"logs\": [\n    {\n      \"eventId\": \"d3b07384-d113-4f90-844a-1e43e2646271\",\n      \"roomCode\": \"lab-01\",\n      \"method\": \"rfid\",\n      \"identifier\": \"01020304\",\n      \"result\": \"granted\",\n      \"userName\": \"Muhammad Isya Asyhari\",\n      \"timestamp\": \"2026-11-24T18:30:00.000Z\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/gateway/logs",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "gateway", "logs"]
+        }
+      }
+    },
+    {
+      "name": "08. Gateway: Kirim Status Heartbeat (PUT)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{gatewayApiKey}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"roomCode\": \"lab-01\",\n  \"version\": \"1.0.0\",\n  \"queueCount\": 0\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/gateway/heartbeat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "gateway", "heartbeat"]
+        }
+      }
+    },
+    {
+      "name": "09. Dosen / Admin: Buka Pintu Jarak Jauh",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/rooms/lab-01/remote-unlock",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "rooms", "lab-01", "remote-unlock"]
+        }
+      }
+    },
+    {
+      "name": "10. Gateway: Ambil Antrean Perintah (GET)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.success && jsonData.data && jsonData.data.commands && jsonData.data.commands.length > 0) {",
+              "  pm.environment.set('commandId', jsonData.data.commands[0].id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{gatewayApiKey}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/gateway/commands",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "gateway", "commands"]
+        }
+      }
+    },
+    {
+      "name": "11. Gateway: Konfirmasi & Hapus Perintah Selesai (DELETE)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{gatewayApiKey}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/gateway/commands/{{commandId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "gateway", "commands", "{{commandId}}"]
+        }
+      }
+    },
+    {
+      "name": "12. Kiosk Gateway: Cek Status Lokal",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{gatewayUrl}}/status",
+          "host": ["{{gatewayUrl}}"],
+          "path": ["status"]
+        }
+      }
+    },
+    {
+      "name": "13. Kiosk Gateway: Emergency Manual PIN (1722)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pin\": \"1722\"\n}"
+        },
+        "url": {
+          "raw": "{{gatewayUrl}}/manual-override",
+          "host": ["{{gatewayUrl}}"],
+          "path": ["manual-override"]
+        }
+      }
+    }
+  ]
+}

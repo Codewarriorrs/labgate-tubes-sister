@@ -1,48 +1,54 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Next.js Build Outputs
+.next/
+out/
+build/
+dist/
 
-# testing
-/coverage
+# Environment Variables & Secrets (SANGAT PENTING: Kredensial tidak boleh ter-push)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+!.env.example
+!*.env.example
 
-# next.js
-/.next/
-/out/
+# Database Lokal (SQLite Gateway)
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+gateway.db*
 
-# production
-/build
-
-# misc
-.DS_Store
+# Private Keys & Certificates
 *.pem
+*.key
+*.cert
+*.crt
 
-# debug
+# Debug Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
 
-# local env files
-.env*.local
-.env
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# cache
-.cache
-.eslintcache
-.turbo
-.swc
+# Editor & OS files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+Desktop.ini
