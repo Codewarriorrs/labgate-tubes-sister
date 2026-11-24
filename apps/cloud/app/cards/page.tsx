@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Plus, Trash2, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { CreditCard, Plus, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Card } from '@/types';
 
 export default function CardsPage() {
+  const router = useRouter();
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -20,6 +22,10 @@ export default function CardsPage() {
     try {
       setLoading(true);
       const resCards = await fetch('/api/cards');
+      if (resCards.status === 401) {
+        router.push('/login');
+        return;
+      }
       const jsonCards = await resCards.json();
       if (jsonCards.success) {
         setCards(jsonCards.data);
@@ -63,7 +69,7 @@ export default function CardsPage() {
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus kartu ini? Pengguna tidak akan dapat mengakses gate dengan kartu ini.')) return;
+    if (!confirm('Hapus kartu ini? Pengguna tidak akan dapat mengakses gate dengan kartu ini.')) return;
     try {
       const res = await fetch(`/api/cards/${cardId}`, { method: 'DELETE' });
       const json = await res.json();
@@ -79,14 +85,14 @@ export default function CardsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header: Direct Typography, no nested boxes, no pill badges */}
+      {/* Header: Direct flat typography without decorative nested boxes */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E5E7EB] pb-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight">
-            Manajemen Kartu Identitas Mahasiswa (KTM RFID)
+            Manajemen Kartu KTM RFID
           </h1>
           <p className="text-xs text-[#4A4A4A] mt-1">
-            Pendaftaran UID fisik kartu ke identitas akun &bull; Disimpan dalam bentuk Hash SHA-256 + Pepper (Hak Akses Kepala TU / Admin)
+            Pendaftaran UID fisik kartu ke identitas akun &bull; Disimpan dalam bentuk Hash SHA-256 (Hak Akses Kepala TU / Admin)
           </p>
         </div>
         <button
@@ -115,73 +121,117 @@ export default function CardsPage() {
         </div>
       )}
 
-      {/* Grid Kartu Terdaftar */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
-          <div className="col-span-full p-8 text-center text-[#4A4A4A] text-xs font-semibold">
-            Memuat daftar kartu...
+      {/* Main Content Area */}
+      {loading ? (
+        <div className="p-8 text-center text-[#4A4A4A] text-xs font-semibold bg-white border border-[#E5E7EB] rounded-[4px]">
+          Memuat daftar kartu...
+        </div>
+      ) : cards.length === 0 ? (
+        <div className="p-8 text-center text-[#4A4A4A] text-xs bg-white rounded-[4px] border border-[#E5E7EB]">
+          Belum ada kartu KTM RFID terdaftar.
+        </div>
+      ) : (
+        <>
+          {/* Desktop View: Flat Clean Table */}
+          <div className="hidden md:block bg-white border border-[#E5E7EB] rounded-[4px] overflow-hidden">
+            <table className="w-full text-left text-xs text-[#1A1A1A]">
+              <thead className="bg-[#F8F9FA] border-b border-[#E5E7EB] text-[#4A4A4A] font-semibold uppercase text-[11px]">
+                <tr>
+                  <th className="py-3 px-4">Label & ID</th>
+                  <th className="py-3 px-4">Pemilik (Mahasiswa / Dosen)</th>
+                  <th className="py-3 px-4">NIM / NIP</th>
+                  <th className="py-3 px-4">Hash UID (SHA-256)</th>
+                  <th className="py-3 px-4 text-center">Status</th>
+                  <th className="py-3 px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E5E7EB]">
+                {cards.map((card) => (
+                  <tr key={card.id} className="hover:bg-[#F8F9FA] transition">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center space-x-2">
+                        <CreditCard className="w-4 h-4 text-[#0066FF] shrink-0" />
+                        <div>
+                          <span className="font-bold text-[#1A1A1A] block">{card.label || 'KTM'}</span>
+                          <span className="font-mono text-[10px] text-[#4A4A4A]">{card.id}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-[#1A1A1A]">{card.userName}</td>
+                    <td className="py-3 px-4 font-mono text-[#4A4A4A]">{card.userNim || '-'}</td>
+                    <td className="py-3 px-4 font-mono text-[11px] text-[#4A4A4A] break-all max-w-xs">
+                      {card.cardHash}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="font-mono text-[11px] font-bold text-[#16A34A]">[AKTIF]</span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <button
+                        onClick={() => handleDeleteCard(card.id)}
+                        className="p-1.5 text-[#4A4A4A] hover:text-[#DC2626] hover:bg-[#FEE2E2] rounded-[2px] transition active:translate-y-[1px]"
+                        title="Hapus Kartu"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ) : cards.length === 0 ? (
-          <div className="col-span-full p-8 text-center text-[#4A4A4A] text-xs bg-white rounded-[4px] border border-[#E5E7EB]">
-            Belum ada kartu KTM RFID terdaftar.
-          </div>
-        ) : cards.map((card) => (
-          <div
-            key={card.id}
-            className="bg-white rounded-[4px] p-5 border border-[#E5E7EB] flex flex-col justify-between hover:border-[#1A1A1A] transition"
-          >
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center space-x-2">
-                  <CreditCard className="w-4 h-4 text-[#0066FF]" />
-                  <div>
-                    <span className="font-bold text-[#1A1A1A] text-sm block">
-                      {card.label || 'KTM Mahasiswa'}
+
+          {/* Mobile View: Flat Clean Cards (No Horizontal Scroll & No Nested Boxes) */}
+          <div className="md:hidden space-y-3">
+            {cards.map((card) => (
+              <div
+                key={card.id}
+                className="bg-white border border-[#E5E7EB] rounded-[4px] p-4 space-y-2.5"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center space-x-2">
+                    <CreditCard className="w-4 h-4 text-[#0066FF] shrink-0" />
+                    <div>
+                      <span className="font-bold text-sm text-[#1A1A1A] block leading-tight">
+                        {card.label || 'KTM'}
+                      </span>
+                      <span className="font-mono text-[10px] text-[#4A4A4A]">{card.id}</span>
+                    </div>
+                  </div>
+                  <span className="font-mono text-[10px] font-bold text-[#16A34A]">[AKTIF]</span>
+                </div>
+
+                <div className="text-xs space-y-1 pt-1 text-[#1A1A1A]">
+                  <div className="flex justify-between">
+                    <span className="text-[#4A4A4A]">Pemilik:</span>
+                    <span className="font-semibold">{card.userName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#4A4A4A]">NIM/NIP:</span>
+                    <span className="font-mono">{card.userNim || '-'}</span>
+                  </div>
+                  <div className="pt-1">
+                    <span className="text-[#4A4A4A] text-[10px] block mb-0.5">Hash UID:</span>
+                    <span className="font-mono text-[10px] text-[#1A1A1A] break-all block bg-[#F8F9FA] p-1.5 rounded-[2px]">
+                      {card.cardHash}
                     </span>
-                    <span className="font-mono text-[10px] text-[#4A4A4A]">ID: {card.id}</span>
                   </div>
                 </div>
 
-                <span className="font-mono text-[10px] uppercase font-bold text-[#16A34A]">
-                  [AKTIF]
-                </span>
-              </div>
-
-              <div className="bg-[#F8F9FA] rounded-[2px] p-3 text-[11px] text-[#1A1A1A] space-y-1.5 border border-[#E5E7EB]">
-                <div className="flex justify-between">
-                  <span className="text-[#4A4A4A]">Pemilik Kartu:</span>
-                  <span className="font-semibold">{card.userName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#4A4A4A]">NIM:</span>
-                  <span className="font-mono">{card.userNim || 'Mahasiswa'}</span>
-                </div>
-                <div className="pt-1 border-t border-[#E5E7EB]">
-                  <span className="text-[#4A4A4A] block text-[10px] mb-0.5">Hash UID (SHA-256):</span>
-                  <span className="font-mono text-[10px] text-[#1A1A1A] break-all block bg-white p-1.5 rounded-[2px] border border-[#E5E7EB]">
-                    {card.cardHash}
-                  </span>
+                <div className="pt-2 border-t border-[#E5E7EB] flex justify-between items-center">
+                  <span className="text-[10px] text-[#16A34A] font-semibold">Tersinkron ke Gateway</span>
+                  <button
+                    onClick={() => handleDeleteCard(card.id)}
+                    className="p-1.5 text-[#DC2626] hover:bg-[#FEE2E2] rounded-[2px] transition flex items-center space-x-1 text-xs"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Hapus</span>
+                  </button>
                 </div>
               </div>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-[#E5E7EB] flex items-center justify-between">
-              <span className="text-[10px] text-[#16A34A] flex items-center font-semibold">
-                <ShieldCheck className="w-3.5 h-3.5 mr-1" />
-                Tersinkron ke Gateway
-              </span>
-
-              <button
-                onClick={() => handleDeleteCard(card.id)}
-                className="p-1.5 text-[#4A4A4A] hover:text-[#DC2626] hover:bg-[#FEE2E2] rounded-[2px] transition"
-                title="Hapus Kartu"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
       {/* Modal Registrasi Kartu */}
       {showAddModal && (
@@ -234,7 +284,7 @@ export default function CardsPage() {
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E7EB]">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-[#E5E7EB]">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}

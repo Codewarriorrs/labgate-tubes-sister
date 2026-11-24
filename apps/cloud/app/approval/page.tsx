@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ClipboardCheck, CheckCircle2, XCircle, Clock, MapPin, AlertCircle, Cpu } from 'lucide-react';
 import { Booking } from '@/types';
 
 export default function ApprovalPage() {
+  const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [rejectingBooking, setRejectingBooking] = useState<Booking | null>(null);
@@ -16,6 +18,10 @@ export default function ApprovalPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/bookings');
+      if (res.status === 401) {
+        router.push('/login');
+        return;
+      }
       const json = await res.json();
       if (json.success) {
         setBookings(json.data);
@@ -86,7 +92,7 @@ export default function ApprovalPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header: Direct Typography, no nested boxes, no pill badges */}
+      {/* Header: Direct Typography, no nested boxes */}
       <div className="border-b border-[#E5E7EB] pb-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight">
           Antrean Persetujuan Peminjaman Lab
@@ -223,44 +229,82 @@ export default function ApprovalPage() {
         )}
       </div>
 
-      {/* Riwayat Keputusan */}
+      {/* Riwayat Keputusan: Responsive Flat Table on Desktop & Cards on Mobile */}
       <div className="bg-white border border-[#E5E7EB] rounded-[4px] overflow-hidden">
         <div className="px-5 py-3.5 border-b border-[#E5E7EB]">
           <h2 className="text-sm sm:text-base font-bold text-[#1A1A1A]">
             Riwayat Keputusan Approval
           </h2>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#1A1A1A]">
-            <thead className="bg-[#F8F9FA] text-[11px] font-semibold text-[#4A4A4A] uppercase tracking-wider border-b border-[#E5E7EB]">
-              <tr>
-                <th className="px-5 py-2.5">ID & Pengguna</th>
-                <th className="px-5 py-2.5">Ruangan</th>
-                <th className="px-5 py-2.5">Waktu</th>
-                <th className="px-5 py-2.5">Keperluan</th>
-                <th className="px-5 py-2.5">Status / Alasan</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E7EB]">
+
+        {pastBookings.length === 0 ? (
+          <div className="p-8 text-center text-[#4A4A4A] text-xs">
+            Belum ada riwayat keputusan approval.
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs text-[#1A1A1A]">
+                <thead className="bg-[#F8F9FA] text-[11px] font-semibold text-[#4A4A4A] uppercase tracking-wider border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="px-5 py-2.5">ID & Pengguna</th>
+                    <th className="px-5 py-2.5">Ruangan</th>
+                    <th className="px-5 py-2.5">Waktu</th>
+                    <th className="px-5 py-2.5">Keperluan</th>
+                    <th className="px-5 py-2.5">Status / Alasan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E7EB]">
+                  {pastBookings.map((b) => (
+                    <tr key={b.id} className="hover:bg-[#F8F9FA] transition">
+                      <td className="px-5 py-3">
+                        <span className="font-semibold text-[#1A1A1A] block">{b.id}</span>
+                        <span className="text-[#4A4A4A] text-[11px]">{b.userName}</span>
+                      </td>
+                      <td className="px-5 py-3 font-medium">
+                        {b.roomName || b.roomId}
+                      </td>
+                      <td className="px-5 py-3 text-[#4A4A4A]">
+                        {new Date(b.startTime).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}{' '}
+                        {new Date(b.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="px-5 py-3 max-w-xs truncate" title={b.purpose}>
+                        {b.purpose}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span
+                          className={`font-mono text-[11px] uppercase font-bold ${
+                            b.status === 'disetujui'
+                              ? 'text-[#16A34A]'
+                              : b.status === 'ditolak'
+                              ? 'text-[#DC2626]'
+                              : 'text-[#4A4A4A]'
+                          }`}
+                        >
+                          [{b.status}]
+                        </span>
+                        {b.rejectionReason && (
+                          <span className="block text-[11px] text-[#DC2626] mt-0.5 truncate max-w-xs">{b.rejectionReason}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View (Zero Horizontal Scroll) */}
+            <div className="md:hidden divide-y divide-[#E5E7EB]">
               {pastBookings.map((b) => (
-                <tr key={b.id} className="hover:bg-[#F8F9FA] transition">
-                  <td className="px-5 py-3">
-                    <span className="font-semibold text-[#1A1A1A] block">{b.id}</span>
-                    <span className="text-[#4A4A4A] text-[11px]">{b.userName}</span>
-                  </td>
-                  <td className="px-5 py-3 font-medium">
-                    {b.roomName || b.roomId}
-                  </td>
-                  <td className="px-5 py-3 text-[#4A4A4A]">
-                    {new Date(b.startTime).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}{' '}
-                    {new Date(b.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-                  </td>
-                  <td className="px-5 py-3 max-w-xs truncate" title={b.purpose}>
-                    {b.purpose}
-                  </td>
-                  <td className="px-5 py-3">
+                <div key={b.id} className="p-4 space-y-2 text-xs">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="font-bold text-sm text-[#1A1A1A] block">{b.userName}</span>
+                      <span className="font-mono text-[10px] text-[#4A4A4A]">{b.id}</span>
+                    </div>
                     <span
-                      className={`font-mono text-[11px] uppercase font-bold ${
+                      className={`font-mono text-[10px] uppercase font-bold ${
                         b.status === 'disetujui'
                           ? 'text-[#16A34A]'
                           : b.status === 'ditolak'
@@ -270,15 +314,34 @@ export default function ApprovalPage() {
                     >
                       [{b.status}]
                     </span>
+                  </div>
+
+                  <div className="space-y-1 text-[#1A1A1A]">
+                    <div className="flex justify-between">
+                      <span className="text-[#4A4A4A]">Ruangan:</span>
+                      <span className="font-semibold">{b.roomName || b.roomId}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#4A4A4A]">Waktu:</span>
+                      <span>
+                        {new Date(b.startTime).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}{' '}
+                        {new Date(b.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p className="text-[#4A4A4A]">
+                      <strong className="text-[#1A1A1A]">Keperluan:</strong> {b.purpose}
+                    </p>
                     {b.rejectionReason && (
-                      <span className="block text-[11px] text-[#DC2626] mt-0.5 truncate max-w-xs">{b.rejectionReason}</span>
+                      <p className="text-[#DC2626] text-[11px]">
+                        <strong>Alasan Tolak:</strong> {b.rejectionReason}
+                      </p>
                     )}
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Modal Tolak Booking */}

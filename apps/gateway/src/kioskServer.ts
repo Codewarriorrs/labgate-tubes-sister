@@ -99,7 +99,7 @@ export function createKioskApp(config: KioskServerConfig) {
     }
   });
 
-  // 5. POST /api/scan (Validasi Scan Tiket QR dari Kamera Device Laptop)
+  // 5. POST /api/scan (Validasi Scan Tiket QR atau Kartu RFID)
   app.post('/api/scan', async (req, res) => {
     const { method, payload } = req.body;
     if (!payload) {
@@ -162,7 +162,7 @@ export function createKioskApp(config: KioskServerConfig) {
     }
   });
 
-  // 6. UI Kiosk Webpage (HTML + Kamera Webcam Scanner + Status Realtime)
+  // 6. UI Kiosk Webpage (HTML + Universal jsQR Camera Scanner + Status Realtime)
   app.get('/', (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(getKioskHtml(config.roomCode));
@@ -179,6 +179,8 @@ function getKioskHtml(roomCode: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LabGate Kiosk - ${roomCode}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Library Universal QR Decoder (Bekerja di seluruh browser tanpa flag khusus) -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <style>
     body { background-color: #F8F9FA; color: #1A1A1A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     .scan-guide {
@@ -221,31 +223,31 @@ function getKioskHtml(roomCode: string): string {
   </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col justify-between p-4 sm:p-6 select-none">
-  <!-- Top Bar: Status Gate, Sync, & Jam -->
-  <header class="flex justify-between items-center bg-white border border-[#E5E7EB] rounded-[4px] px-6 py-4">
+  <!-- Top Bar: Status Gate, Sync, & Emergency PIN -->
+  <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-[#E5E7EB] rounded-[4px] px-5 py-4 gap-3">
     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-[4px] bg-[#1A1A1A] flex items-center justify-center font-bold text-base text-white">
+      <div class="w-10 h-10 rounded-[4px] bg-[#1A1A1A] flex items-center justify-center font-bold text-base text-white shrink-0">
         LG
       </div>
       <div>
         <h1 class="font-bold text-base text-[#1A1A1A] tracking-tight leading-tight">Gate Laboratorium &bull; ${roomCode}</h1>
-        <p class="text-[11px] text-[#4A4A4A]">LabGate Edge Gateway Service</p>
+        <p class="text-[11px] text-[#4A4A4A]">LabGate Edge Gateway Service &bull; Standalone Offline Resilient</p>
       </div>
     </div>
 
-    <div class="flex items-center space-x-3 sm:space-x-4 text-xs">
+    <div class="flex items-center space-x-2 sm:space-x-3 text-xs w-full sm:w-auto justify-between sm:justify-end">
       <div class="flex items-center space-x-2 bg-[#F8F9FA] px-3 py-1.5 rounded-[4px] border border-[#E5E7EB]">
         <span id="networkDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
         <span id="networkStatus" class="font-bold text-emerald-700">Online</span>
       </div>
 
-      <div class="hidden sm:block text-right">
+      <div class="hidden md:block text-right">
         <span id="lastSyncText" class="text-[#4A4A4A] block text-[11px]">Sinkron: Memuat...</span>
         <span id="outboxCount" class="text-[#0066FF] font-semibold block text-[11px]">Outbox: 0 event</span>
       </div>
 
       <button onclick="openPinModal()" class="flat-btn-secondary px-3 py-1.5 text-xs">
-        Emergency PIN
+        Emergency PIN (1722)
       </button>
     </div>
   </header>
@@ -261,14 +263,30 @@ function getKioskHtml(roomCode: string): string {
 
       <div class="relative w-full aspect-square max-w-sm rounded-[4px] overflow-hidden bg-black flex items-center justify-center border border-[#E5E7EB]">
         <video id="webcamVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+        <canvas id="qrCanvas" class="hidden"></canvas>
         <div class="absolute inset-8 scan-guide rounded-[4px] pointer-events-none flex items-center justify-center">
           <span class="text-[11px] text-white font-semibold bg-[#1A1A1A]/80 px-3 py-1 rounded-[2px]">Arahkan Tiket QR ke Sini</span>
         </div>
       </div>
 
       <p class="text-[11px] text-[#4A4A4A] text-center">
-        Kamera laptop membaca tiket QR ber-tanda tangan Ed25519 langsung secara offline
+        Dekoder kamera membaca tiket QR ber-tanda tangan Ed25519 langsung secara offline
       </p>
+
+      <!-- Input Manual / Paste Token QR untuk Kemudahan Pengujian -->
+      <div class="w-full pt-3 border-t border-[#E5E7EB] space-y-2">
+        <div class="flex items-center space-x-2">
+          <input
+            id="manualQrInput"
+            type="text"
+            placeholder="Atau tempel/paste token QR di sini..."
+            class="flex-1 px-3 py-1.5 border border-[#D1D5DB] rounded-[4px] font-mono text-xs focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+          />
+          <button onclick="submitManualQr()" class="flat-btn-primary px-3 py-1.5 text-xs">
+            Validasi QR
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Kolom Kanan: Status & Hasil Verifikasi Pintu -->
@@ -291,7 +309,7 @@ function getKioskHtml(roomCode: string): string {
 
       <!-- Quick Scan RFID Mock untuk Pengujian Cepat di Laptop -->
       <div class="bg-white border border-[#E5E7EB] rounded-[4px] p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center space-x-2">
+        <div class="flex flex-wrap items-center gap-2">
           <span class="text-[#4A4A4A] font-semibold">Simulasi Kartu:</span>
           <button onclick="testRfid('01020304')" class="flat-btn-primary px-3 py-1.5 text-xs">
             Tap KTM Isya (01020304)
@@ -468,6 +486,14 @@ function getKioskHtml(roomCode: string): string {
       }
     }
 
+    // Manual QR Input Submit
+    async function submitManualQr() {
+      const val = document.getElementById('manualQrInput').value.trim();
+      if (!val) return;
+      handleQrDetected(val);
+      document.getElementById('manualQrInput').value = '';
+    }
+
     // Modal PIN
     function openPinModal() {
       document.getElementById('pinModal').classList.remove('hidden');
@@ -493,10 +519,12 @@ function getKioskHtml(roomCode: string): string {
       }
     }
 
-    // Webcam Video Stream & Barcode Detection
+    // Universal Webcam Video Stream & jsQR Decoding
     let scanning = false;
     async function startWebcam() {
       const video = document.getElementById('webcamVideo');
+      const canvas = document.getElementById('qrCanvas');
+      const ctx = canvas.getContext('2d');
       const camStatus = document.getElementById('camStatus');
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -509,33 +537,37 @@ function getKioskHtml(roomCode: string): string {
           video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 640 } }
         });
         video.srcObject = stream;
-        camStatus.innerText = 'Kamera Aktif';
-        initBarcodeDetector(video);
-      } catch (err) {
-        camStatus.innerText = 'Izin kamera ditolak / tidak ditemukan';
-      }
-    }
+        camStatus.innerText = 'Kamera Aktif (Scanning...)';
 
-    function initBarcodeDetector(video) {
-      if ('BarcodeDetector' in window) {
-        const detector = new BarcodeDetector({ formats: ['qr_code'] });
-        setInterval(async () => {
+        // Loop continuous decoding via jsQR
+        function tick() {
           if (video.readyState === video.HAVE_ENOUGH_DATA && !scanning) {
-            try {
-              const barcodes = await detector.detect(video);
-              if (barcodes.length > 0) {
-                const qrRawValue = barcodes[0].rawValue;
-                handleQrDetected(qrRawValue);
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+            if (window.jsQR) {
+              const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: 'dontInvert',
+              });
+
+              if (code && code.data && code.data.trim().length > 0) {
+                handleQrDetected(code.data.trim());
               }
-            } catch (e) {}
+            }
           }
-        }, 500);
-      } else {
-        document.getElementById('camStatus').innerText = 'Kamera Aktif (Native QR Scanner)';
+          requestAnimationFrame(tick);
+        }
+
+        requestAnimationFrame(tick);
+      } catch (err) {
+        camStatus.innerText = 'Izin kamera ditolak / Kamera tidak aktif';
       }
     }
 
     async function handleQrDetected(qrString) {
+      if (scanning) return;
       scanning = true;
       try {
         const res = await fetch('/api/scan', {
@@ -545,8 +577,10 @@ function getKioskHtml(roomCode: string): string {
         });
         const json = await res.json();
         showDecision(json);
-      } catch (err) {}
-      setTimeout(() => { scanning = false; }, 4000);
+      } catch (err) {
+        console.error(err);
+      }
+      setTimeout(() => { scanning = false; }, 3500);
     }
 
     window.addEventListener('load', startWebcam);

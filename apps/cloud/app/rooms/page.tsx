@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Unlock, AlertCircle, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
 import { Room } from '@/types';
 
 export default function RoomsPage() {
+  const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [unlockLoadingId, setUnlockLoadingId] = useState<string | null>(null);
@@ -23,6 +25,10 @@ export default function RoomsPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/rooms');
+      if (res.status === 401) {
+        router.push('/login');
+        return;
+      }
       const json = await res.json();
       if (json.success) {
         setRooms(json.data);

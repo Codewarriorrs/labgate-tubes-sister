@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Filter, CheckCircle2, XCircle, RefreshCw, Key, QrCode, CreditCard, Shield } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Filter, RefreshCw, Key, QrCode, CreditCard, Shield, Clock, MapPin, User as UserIcon } from 'lucide-react';
 import { AccessLog, Room } from '@/types';
 
 export default function LogsPage() {
+  const router = useRouter();
   const [logs, setLogs] = useState<AccessLog[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,11 @@ export default function LogsPage() {
         fetch(`/api/access-logs?${params.toString()}`),
         fetch('/api/rooms'),
       ]);
+
+      if (resLogs.status === 401 || resRooms.status === 401) {
+        router.push('/login');
+        return;
+      }
 
       const jsonLogs = await resLogs.json();
       const jsonRooms = await resRooms.json();
@@ -80,32 +87,31 @@ export default function LogsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header: Direct Typography, no nested boxes, no pill badges */}
+      {/* Header: Direct Typography */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E5E7EB] pb-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight">
-            Log Audit & Riwayat Akses Pintu Laboratorium
+            Log Akses Pintu Laboratorium
           </h1>
           <p className="text-xs text-[#4A4A4A] mt-1">
-            Rekam jejak setiap pemindaian KTM RFID, tiket QR, pembukaan darurat PIN, dan remote unlock
+            Rekam jejak akses fisik pintu realtime dari seluruh edge gateway (Hak Akses Dosen & Admin)
           </p>
         </div>
         <button
           onClick={fetchLogs}
+          disabled={loading}
           className="btn-secondary self-start sm:self-auto"
         >
-          <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+          <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? 'animate-spin' : ''}`} />
           Segarkan Data
         </button>
       </div>
 
       {/* Filter Bar */}
       <div className="bg-white border border-[#E5E7EB] rounded-[4px] p-4">
-        <div className="flex items-center space-x-2 mb-3 pb-2 border-b border-[#E5E7EB]">
+        <div className="flex items-center space-x-2 mb-3 text-xs font-bold text-[#1A1A1A] uppercase tracking-wider">
           <Filter className="w-3.5 h-3.5 text-[#0066FF]" />
-          <span className="text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider">
-            Filter Log Akses
-          </span>
+          <span>Filter Rekam Akses</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -161,7 +167,7 @@ export default function LogsPage() {
         </div>
       </div>
 
-      {/* Tabel Log Akses */}
+      {/* Tabel Log Akses: Responsive Desktop Table & Mobile Cards */}
       <div className="bg-white border border-[#E5E7EB] rounded-[4px] overflow-hidden">
         <div className="px-5 py-3 border-b border-[#E5E7EB] flex items-center justify-between">
           <h2 className="text-sm sm:text-base font-bold text-[#1A1A1A]">
@@ -181,65 +187,124 @@ export default function LogsPage() {
             Tidak ada data log yang cocok dengan filter.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#1A1A1A]">
-              <thead className="bg-[#F8F9FA] text-[11px] font-semibold text-[#4A4A4A] uppercase tracking-wider border-b border-[#E5E7EB]">
-                <tr>
-                  <th className="px-5 py-2.5">Waktu Peristiwa</th>
-                  <th className="px-5 py-2.5">Ruangan</th>
-                  <th className="px-5 py-2.5">Metode</th>
-                  <th className="px-5 py-2.5">Identitas / Pemilik</th>
-                  <th className="px-5 py-2.5">Hasil</th>
-                  <th className="px-5 py-2.5">Keterangan</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E5E7EB]">
-                {logs.map((log) => {
-                  const tStr = new Date(log.timestamp).toLocaleString('id-ID', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                  });
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs text-[#1A1A1A]">
+                <thead className="bg-[#F8F9FA] text-[11px] font-semibold text-[#4A4A4A] uppercase tracking-wider border-b border-[#E5E7EB]">
+                  <tr>
+                    <th className="px-5 py-2.5">Waktu Peristiwa</th>
+                    <th className="px-5 py-2.5">Ruangan</th>
+                    <th className="px-5 py-2.5">Metode</th>
+                    <th className="px-5 py-2.5">Identitas / Pemilik</th>
+                    <th className="px-5 py-2.5">Hasil</th>
+                    <th className="px-5 py-2.5">Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E5E7EB]">
+                  {logs.map((log) => {
+                    const tStr = new Date(log.timestamp).toLocaleString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    });
 
-                  return (
-                    <tr key={log.id} className="hover:bg-[#F8F9FA] transition">
-                      <td className="px-5 py-3 whitespace-nowrap font-mono text-[11px] text-[#4A4A4A]">
-                        {tStr}
-                      </td>
-                      <td className="px-5 py-3 font-semibold">
-                        {log.roomName || log.roomId}
-                      </td>
-                      <td className="px-5 py-3 whitespace-nowrap">
-                        {getMethodBadge(log.method)}
-                      </td>
-                      <td className="px-5 py-3">
-                        <span className="font-semibold block">{log.userName || 'Anonim'}</span>
-                        <span className="font-mono text-[10px] text-[#4A4A4A] truncate block max-w-[140px]" title={log.identifier}>
+                    return (
+                      <tr key={log.id} className="hover:bg-[#F8F9FA] transition">
+                        <td className="px-5 py-3 whitespace-nowrap font-mono text-[11px] text-[#4A4A4A]">
+                          {tStr}
+                        </td>
+                        <td className="px-5 py-3 font-semibold">
+                          {log.roomName || log.roomId}
+                        </td>
+                        <td className="px-5 py-3 whitespace-nowrap">
+                          {getMethodBadge(log.method)}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className="font-semibold block">{log.userName || 'Anonim'}</span>
+                          <span className="font-mono text-[10px] text-[#4A4A4A] truncate block max-w-[140px]" title={log.identifier}>
+                            {log.identifier}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 whitespace-nowrap">
+                          {log.result === 'granted' ? (
+                            <span className="font-mono text-[10px] font-bold text-[#16A34A] uppercase">
+                              [DITERIMA]
+                            </span>
+                          ) : (
+                            <span className="font-mono text-[10px] font-bold text-[#DC2626] uppercase">
+                              [DITOLAK]
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3 text-[#4A4A4A] max-w-xs truncate" title={log.reason || 'Akses Berhasil'}>
+                          {log.reason || 'Akses Berhasil'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards View (Zero Horizontal Scroll) */}
+            <div className="md:hidden divide-y divide-[#E5E7EB]">
+              {logs.map((log) => {
+                const tStr = new Date(log.timestamp).toLocaleString('id-ID', {
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                });
+
+                return (
+                  <div key={log.id} className="p-4 space-y-2 text-xs">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-0.5">
+                        <span className="font-bold text-sm text-[#1A1A1A] block">
+                          {log.userName || 'Anonim'}
+                        </span>
+                        <span className="font-mono text-[10px] text-[#4A4A4A] block">
                           {log.identifier}
                         </span>
-                      </td>
-                      <td className="px-5 py-3 whitespace-nowrap">
-                        {log.result === 'granted' ? (
-                          <span className="font-mono text-[10px] font-bold text-[#16A34A] uppercase">
-                            [DITERIMA]
-                          </span>
-                        ) : (
-                          <span className="font-mono text-[10px] font-bold text-[#DC2626] uppercase">
-                            [DITOLAK]
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3 text-[#4A4A4A] max-w-xs truncate" title={log.reason || 'Akses Berhasil'}>
-                        {log.reason || 'Akses Berhasil'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+                      {log.result === 'granted' ? (
+                        <span className="font-mono text-[10px] font-bold text-[#16A34A] uppercase">
+                          [DITERIMA]
+                        </span>
+                      ) : (
+                        <span className="font-mono text-[10px] font-bold text-[#DC2626] uppercase">
+                          [DITOLAK]
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-1 text-[#1A1A1A]">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#4A4A4A]">Ruangan:</span>
+                        <span className="font-semibold">{log.roomName || log.roomId}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#4A4A4A]">Metode:</span>
+                        <span>{getMethodBadge(log.method)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#4A4A4A]">Waktu:</span>
+                        <span className="font-mono text-[11px] text-[#4A4A4A]">{tStr}</span>
+                      </div>
+                      <div className="pt-1 border-t border-[#E5E7EB]">
+                        <span className="text-[#4A4A4A] text-[11px]">Keterangan:</span>{' '}
+                        <span className="font-medium">{log.reason || 'Akses Berhasil'}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>
