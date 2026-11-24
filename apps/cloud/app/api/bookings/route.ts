@@ -6,8 +6,8 @@ import { BookingStatus } from '@/types';
 
 const createBookingSchema = z.object({
   roomId: z.string().min(1, 'Ruangan wajib dipilih'),
-  equipmentId: z.string().nullable().optional(),
-  purpose: z.string().min(5, 'Keperluan penggunaan laboratorium minimal 5 karakter'),
+  equipmentId: z.union([z.string(), z.array(z.string())]).nullable().optional(),
+  purpose: z.string().min(5, 'Keperluan peminjaman laboratorium minimal 5 karakter'),
   startTime: z.string().datetime('Format tanggal & jam mulai tidak valid (ISO 8601)'),
   endTime: z.string().datetime('Format tanggal & jam selesai tidak valid (ISO 8601)'),
 });
@@ -25,8 +25,23 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const roomId = searchParams.get('roomId') || undefined;
     const status = (searchParams.get('status') as BookingStatus) || undefined;
+    const scheduleOnly = searchParams.get('scheduleOnly') === 'true';
 
-    // Mahasiswa hanya melihat booking miliknya, kecuali admin/dosen
+    // Jika scheduleOnly=true, return semua jadwal aktif untuk ruangan tersebut agar peminjam tahu jam terisi
+    if (scheduleOnly) {
+      const allActive = await listBookings({
+        roomId,
+      });
+      // Ambil yang disetujui atau menunggu
+      const filtered = allActive.filter((b) => b.status === 'disetujui' || b.status === 'menunggu');
+      return NextResponse.json({
+        success: true,
+        data: filtered,
+        message: 'Jadwal ruangan berhasil diambil',
+      });
+    }
+
+    // Mahasiswa hanya melihat riwayat booking miliknya, kecuali admin/dosen
     const filterUserId = user.role === 'mahasiswa' ? user.userId : searchParams.get('userId') || undefined;
 
     const bookings = await listBookings({
@@ -74,12 +89,56 @@ export async function POST(request: NextRequest) {
 
     const { roomId, equipmentId, purpose, startTime, endTime } = parsed.data;
 
-    // Validasi rentang waktu
+    // 1. Validasi rentang waktu dasar
     const start = new Date(startTime).getTime();
     const end = new Date(endTime).getTime();
+    const now = Date.now();
+
     if (end <= start) {
       return NextResponse.json(
         { success: false, data: null, message: 'Waktu selesai harus lebih besar daripada waktu mulai' },
+        { status: 400 }
+      );
+    }
+
+    // 2. Validasi Tidak Boleh di Masa Lalu (toleransi 60 detik untuk network delay)
+    if (start < now - 60000) {
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          message: 'Waktu mulai peminjaman tidak boleh berada di masa lalu (sebelum waktu sekarang)',
+        },
+        { status: 400 }
+      );
+    }
+
+    // 3. Validasi Jam Kerja Operasional (06.00 - 19.00 WIB)
+    // Hitung jam dalam Waktu Indonesia Barat (UTC+7)
+    const startDate = new Date(start);
+    const startHourWib = (startDate.getUTCHours() + 7) % 24;
+    const endDate = new Date(end);
+    const endHourWib = (endDate.getUTCHours() + 7) % 24;
+    const endMinWib = endDate.getUTCMinutes();
+
+    if (startHourWib < 6) {
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          message: 'Peminjaman laboratorium hanya diperbolehkan mulai pukul 06.00 WIB',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (endHourWib > 19 || (endHourWib === 19 && endMinWib > 0)) {
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          message: 'Peminjaman laboratorium hanya diperbolehkan maksimal hingga pukul 19.00 WIB',
+        },
         { status: 400 }
       );
     }
@@ -92,26 +151,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // CEGAH BENTROK JADWAL DI SISI SERVER
+    // 4. CEGAH BENTROK JADWAL DI SISI SERVER
     const conflict = await checkBookingConflict(room.id, startTime, endTime);
     if (conflict.hasConflict) {
-      const confStart = new Date(conflict.conflictingBooking!.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      const confEnd = new Date(conflict.conflictingBooking!.endTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const confStart = new Date(conflict.conflictingBooking!.startTime).toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const confEnd = new Date(conflict.conflictingBooking!.endTime).toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
       return NextResponse.json(
         {
           success: false,
           data: null,
-          message: `${room.name} sudah dibooking pada pukul ${confStart} - ${confEnd}. Silakan pilih jam atau ruangan lain`,
+          message: `${room.name} sudah dipinjam pada pukul ${confStart} - ${confEnd} WIB. Silakan pilih slot jam lain`,
           conflict: conflict.conflictingBooking,
         },
         { status: 409 }
       );
     }
 
+    // Normalize equipmentId (bila array, join comma-separated)
+    const formattedEquipmentId = Array.isArray(equipmentId)
+      ? equipmentId.filter(Boolean).join(',')
+      : equipmentId || null;
+
     const newBooking = await createBooking({
       userId: user.userId,
       roomId: room.id,
-      equipmentId: equipmentId || null,
+      equipmentId: formattedEquipmentId,
       purpose,
       startTime,
       endTime,

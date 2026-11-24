@@ -3,58 +3,63 @@
 @tailwind utilities;
 
 :root {
-  --primary: #1A1A1A;
-  --secondary: #4A4A4A;
-  --tertiary: #0066FF;
-  --background: #FFFFFF;
+  --primary: #1E293B;
+  --secondary: #64748B;
+  --accent: #2563EB;
+  --background: #F8FAFC;
   --surface: #FFFFFF;
 }
 
 body {
-  background-color: #F8F9FA;
-  color: #1A1A1A;
+  background-color: #F8FAFC;
+  color: #0F172A;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Flat Design Buttons with crisp tactile press */
+/* Modern Gradient Buttons (Biru Gradasi Ungu) */
 .btn-primary {
-  background-color: #1A1A1A;
+  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 50%, #7C3AED 100%);
   color: #FFFFFF;
-  font-weight: 600;
-  border-radius: 4px;
-  border: 1px solid #1A1A1A;
-  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1.25rem;
   font-size: 0.875rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 150ms ease, transform 100ms ease;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
 }
 .btn-primary:hover {
-  background-color: #333333;
+  background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 50%, #6D28D9 100%);
+  box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35);
+  transform: translateY(-0.5px);
 }
 .btn-primary:active {
   transform: translateY(1px);
 }
 
 .btn-accent {
-  background-color: #0066FF;
+  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
   color: #FFFFFF;
-  font-weight: 600;
-  border-radius: 4px;
-  border: 1px solid #0066FF;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 150ms ease, transform 100ms ease;
+  transition: all 150ms ease;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.15);
 }
 .btn-accent:hover {
-  background-color: #0052CC;
+  background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%);
+  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
 }
 .btn-accent:active {
   transform: translateY(1px);
@@ -62,62 +67,44 @@ body {
 
 .btn-secondary {
   background-color: #FFFFFF;
-  color: #1A1A1A;
-  font-weight: 600;
-  border-radius: 4px;
-  border: 1px solid #D1D5DB;
+  color: #334155;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 150ms ease, transform 100ms ease;
+  transition: all 150ms ease;
   cursor: pointer;
 }
 .btn-secondary:hover {
-  background-color: #F3F4F6;
+  background-color: #F1F5F9;
+  border-color: #94A3B8;
+  color: #0F172A;
 }
 .btn-secondary:active {
   transform: translateY(1px);
 }
 
 .btn-danger {
-  background-color: #DC2626;
+  background-color: #EF4444;
   color: #FFFFFF;
-  font-weight: 600;
-  border-radius: 4px;
+  font-weight: 500;
+  border-radius: 8px;
   border: 1px solid #DC2626;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 150ms ease, transform 100ms ease;
+  transition: all 150ms ease;
   cursor: pointer;
 }
 .btn-danger:hover {
-  background-color: #B91C1C;
+  background-color: #DC2626;
 }
 .btn-danger:active {
   transform: translateY(1px);
-}
-
-/* Flat Card Container - clean lines, no shadows, no gradients */
-.flat-card {
-  background-color: #FFFFFF;
-  border-radius: 4px;
-  border: 1px solid #E5E7EB;
-}
-
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #F8F9FA;
-}
-::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
-  border-radius: 2px;
 }
