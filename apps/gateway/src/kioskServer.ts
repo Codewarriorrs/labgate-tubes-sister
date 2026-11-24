@@ -180,72 +180,71 @@ function getKioskHtml(roomCode: string): string {
   <title>LabGate Kiosk - ${roomCode}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background-color: #ddf4ff; color: #3c3c3c; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #F8F9FA; color: #1A1A1A; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     .scan-guide {
-      border: 3px dashed #0f766e;
+      border: 2px dashed #0066FF;
       animation: pulseBorder 2s infinite ease-in-out;
     }
     @keyframes pulseBorder {
-      0%, 100% { border-color: rgba(15, 118, 110, 0.4); }
-      50% { border-color: rgba(15, 118, 110, 0.9); }
+      0%, 100% { border-color: rgba(0, 102, 255, 0.4); }
+      50% { border-color: rgba(0, 102, 255, 0.9); }
     }
-    .duo-btn-primary {
-      background-color: #0f766e;
-      color: #ffffff;
-      font-weight: 800;
-      border-radius: 12px;
-      border-bottom: 4px solid #134e4a;
-      transition: all 0.15s ease;
+    .flat-btn-primary {
+      background-color: #1A1A1A;
+      color: #FFFFFF;
+      font-weight: 600;
+      border-radius: 4px;
+      border: 1px solid #1A1A1A;
+      transition: all 150ms ease;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
-    .duo-btn-primary:hover { background-color: #115e59; }
-    .duo-btn-primary:active { border-bottom-width: 0px; transform: translateY(4px); }
+    .flat-btn-primary:hover { background-color: #333333; }
+    .flat-btn-primary:active { transform: translateY(1px); }
 
-    .duo-btn-secondary {
-      background-color: #ffffff;
-      color: #3c3c3c;
-      font-weight: 800;
-      border-radius: 12px;
-      border: 2px solid #bae6fd;
-      border-bottom: 4px solid #7dd3fc;
-      transition: all 0.15s ease;
+    .flat-btn-secondary {
+      background-color: #FFFFFF;
+      color: #1A1A1A;
+      font-weight: 600;
+      border-radius: 4px;
+      border: 1px solid #D1D5DB;
+      transition: all 150ms ease;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
-    .duo-btn-secondary:hover { background-color: #f0f9ff; }
-    .duo-btn-secondary:active { border-bottom-width: 2px; transform: translateY(2px); }
+    .flat-btn-secondary:hover { background-color: #F3F4F6; }
+    .flat-btn-secondary:active { transform: translateY(1px); }
   </style>
 </head>
 <body class="min-h-[100dvh] flex flex-col justify-between p-4 sm:p-6 select-none">
   <!-- Top Bar: Status Gate, Sync, & Jam -->
-  <header class="flex justify-between items-center bg-white border-2 border-[#bae6fd] rounded-2xl px-6 py-4 shadow-sm">
+  <header class="flex justify-between items-center bg-white border border-[#E5E7EB] rounded-[4px] px-6 py-4">
     <div class="flex items-center space-x-3">
-      <div class="w-11 h-11 rounded-2xl bg-[#0f766e] border-b-4 border-[#134e4a] flex items-center justify-center font-extrabold text-lg text-white shadow-sm">
+      <div class="w-10 h-10 rounded-[4px] bg-[#1A1A1A] flex items-center justify-center font-bold text-base text-white">
         LG
       </div>
       <div>
-        <h1 class="font-extrabold text-base text-[#3c3c3c] tracking-tight leading-tight">Gate Laboratorium &bull; ${roomCode}</h1>
-        <p class="text-[11px] text-[#777777] font-bold">LabGate Edge Gateway Service</p>
+        <h1 class="font-bold text-base text-[#1A1A1A] tracking-tight leading-tight">Gate Laboratorium &bull; ${roomCode}</h1>
+        <p class="text-[11px] text-[#4A4A4A]">LabGate Edge Gateway Service</p>
       </div>
     </div>
 
     <div class="flex items-center space-x-3 sm:space-x-4 text-xs">
-      <div class="flex items-center space-x-2 bg-[#ddf4ff] px-3 py-1.5 rounded-xl border border-[#bae6fd]">
+      <div class="flex items-center space-x-2 bg-[#F8F9FA] px-3 py-1.5 rounded-[4px] border border-[#E5E7EB]">
         <span id="networkDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span id="networkStatus" class="font-extrabold text-emerald-800">Online</span>
+        <span id="networkStatus" class="font-bold text-emerald-700">Online</span>
       </div>
 
       <div class="hidden sm:block text-right">
-        <span id="lastSyncText" class="text-[#777777] block text-[11px] font-medium">Sinkron: Memuat...</span>
-        <span id="outboxCount" class="text-[#0f766e] font-extrabold block text-[11px]">Outbox: 0 event</span>
+        <span id="lastSyncText" class="text-[#4A4A4A] block text-[11px]">Sinkron: Memuat...</span>
+        <span id="outboxCount" class="text-[#0066FF] font-semibold block text-[11px]">Outbox: 0 event</span>
       </div>
 
-      <button onclick="openPinModal()" class="duo-btn-secondary px-3 py-1.5 text-xs font-extrabold">
+      <button onclick="openPinModal()" class="flat-btn-secondary px-3 py-1.5 text-xs">
         Emergency PIN
       </button>
     </div>
@@ -254,20 +253,20 @@ function getKioskHtml(roomCode: string): string {
   <!-- Main Grid: Scanner & Instruksi -->
   <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 my-6 flex-1 items-center">
     <!-- Kolom Kiri: Kamera Webcam Scanner QR -->
-    <div class="lg:col-span-5 bg-white border-2 border-[#bae6fd] rounded-3xl p-5 shadow-sm flex flex-col items-center">
-      <div class="w-full flex justify-between items-center mb-3 text-xs">
-        <span class="font-extrabold uppercase tracking-wider text-[11px] text-[#0f766e]">Kamera Scanner Tiket QR</span>
-        <span id="camStatus" class="text-[11px] text-[#777777] font-medium">Menyiapkan webcam...</span>
+    <div class="lg:col-span-5 bg-white border border-[#E5E7EB] rounded-[4px] p-5 flex flex-col items-center space-y-3">
+      <div class="w-full flex justify-between items-center text-xs">
+        <span class="font-bold uppercase tracking-wider text-[11px] text-[#0066FF]">Kamera Scanner Tiket QR</span>
+        <span id="camStatus" class="text-[11px] text-[#4A4A4A]">Menyiapkan webcam...</span>
       </div>
 
-      <div class="relative w-full aspect-square max-w-sm rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center border-2 border-[#bae6fd]">
+      <div class="relative w-full aspect-square max-w-sm rounded-[4px] overflow-hidden bg-black flex items-center justify-center border border-[#E5E7EB]">
         <video id="webcamVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
-        <div class="absolute inset-8 scan-guide rounded-2xl pointer-events-none flex items-center justify-center">
-          <span class="text-[11px] text-white font-extrabold bg-[#0f766e]/90 px-3.5 py-1.5 rounded-xl shadow">Arahkan Tiket QR ke Sini</span>
+        <div class="absolute inset-8 scan-guide rounded-[4px] pointer-events-none flex items-center justify-center">
+          <span class="text-[11px] text-white font-semibold bg-[#1A1A1A]/80 px-3 py-1 rounded-[2px]">Arahkan Tiket QR ke Sini</span>
         </div>
       </div>
 
-      <p class="text-[11px] text-[#777777] text-center mt-3 font-medium">
+      <p class="text-[11px] text-[#4A4A4A] text-center">
         Kamera laptop membaca tiket QR ber-tanda tangan Ed25519 langsung secara offline
       </p>
     </div>
@@ -275,46 +274,46 @@ function getKioskHtml(roomCode: string): string {
     <!-- Kolom Kanan: Status & Hasil Verifikasi Pintu -->
     <div class="lg:col-span-7 flex flex-col justify-center space-y-4">
       <!-- Big Decision Display Card -->
-      <div id="decisionCard" class="bg-white border-2 border-[#bae6fd] rounded-3xl p-8 shadow-sm transition-all duration-300 text-center space-y-4 min-h-[280px] flex flex-col justify-center items-center">
-        <div id="decisionIcon" class="w-20 h-20 rounded-2xl bg-[#ddf4ff] border-2 border-[#bae6fd] flex items-center justify-center text-4xl mb-2 text-[#0f766e]">
+      <div id="decisionCard" class="bg-white border border-[#E5E7EB] rounded-[4px] p-8 transition-all duration-200 text-center space-y-3 min-h-[260px] flex flex-col justify-center items-center">
+        <div id="decisionIcon" class="w-16 h-16 rounded-[4px] bg-[#F8F9FA] border border-[#E5E7EB] flex items-center justify-center text-3xl mb-1 text-[#1A1A1A]">
           🚪
         </div>
-        <h2 id="decisionTitle" class="text-2xl font-extrabold text-[#3c3c3c] tracking-tight">
+        <h2 id="decisionTitle" class="text-2xl font-bold text-[#1A1A1A] tracking-tight">
           Tempelkan KTM atau Tunjukkan QR
         </h2>
-        <p id="decisionDesc" class="text-xs text-[#777777] max-w-md font-medium">
-          Akses pintu tervalidasi secara instan menggunakan RFID atau tiket QR. Tetap berfungsi penuh saat internet kampus mati.
+        <p id="decisionDesc" class="text-xs text-[#4A4A4A] max-w-md">
+          Akses pintu tervalidasi secara instan menggunakan RFID atau tiket QR. Tetap berfungsi penuh saat internet offline.
         </p>
-        <div id="remainingBadge" class="hidden px-4 py-1.5 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-full text-xs font-extrabold">
+        <div id="remainingBadge" class="hidden px-3 py-1 bg-white border border-[#16A34A] text-[#16A34A] rounded-[2px] text-xs font-mono font-bold">
           Sisa Waktu Booking: <span id="remainingTime">-</span>
         </div>
       </div>
 
       <!-- Quick Scan RFID Mock untuk Pengujian Cepat di Laptop -->
-      <div class="bg-white border-2 border-[#bae6fd] rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="bg-white border border-[#E5E7EB] rounded-[4px] p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center space-x-2">
-          <span class="text-[#777777] font-bold">Simulasi Kartu:</span>
-          <button onclick="testRfid('01020304')" class="duo-btn-primary px-3 py-1.5 text-xs">
+          <span class="text-[#4A4A4A] font-semibold">Simulasi Kartu:</span>
+          <button onclick="testRfid('01020304')" class="flat-btn-primary px-3 py-1.5 text-xs">
             Tap KTM Isya (01020304)
           </button>
-          <button onclick="testRfid('99999999')" class="duo-btn-secondary px-3 py-1.5 text-xs">
+          <button onclick="testRfid('99999999')" class="flat-btn-secondary px-3 py-1.5 text-xs">
             Tap Kartu Asing (99999999)
           </button>
         </div>
-        <span class="text-[11px] text-[#777777] font-medium">Mendukung Tap Wokwi (MQTT) & Direct Web</span>
+        <span class="text-[11px] text-[#4A4A4A]">Mendukung Tap Wokwi (MQTT) & Direct Web</span>
       </div>
     </div>
   </main>
 
   <!-- Bottom: 20 Log Terakhir -->
-  <footer class="bg-white border-2 border-[#bae6fd] rounded-2xl p-4 shadow-sm text-xs">
+  <footer class="bg-white border border-[#E5E7EB] rounded-[4px] p-4 text-xs">
     <div class="flex justify-between items-center mb-2.5">
-      <span class="font-extrabold text-[#3c3c3c] text-xs uppercase tracking-wider">20 Aktivitas Scan Terakhir (SQLite Lokal)</span>
-      <span class="text-[11px] text-[#777777] font-medium">Auto-update berkala</span>
+      <span class="font-bold text-[#1A1A1A] text-xs uppercase tracking-wider">20 Aktivitas Scan Terakhir (SQLite Lokal)</span>
+      <span class="text-[11px] text-[#4A4A4A]">Auto-update berkala</span>
     </div>
     <div class="overflow-x-auto max-h-36 overflow-y-auto">
-      <table class="w-full text-left text-[11px] text-[#3c3c3c]">
-        <thead class="text-[#777777] font-extrabold uppercase text-[10px] border-b-2 border-slate-100 bg-[#f0f9ff]">
+      <table class="w-full text-left text-[11px] text-[#1A1A1A]">
+        <thead class="text-[#4A4A4A] font-semibold uppercase text-[10px] border-b border-[#E5E7EB] bg-[#F8F9FA]">
           <tr>
             <th class="py-1.5 px-3">Waktu</th>
             <th class="py-1.5 px-3">Metode</th>
@@ -323,22 +322,22 @@ function getKioskHtml(roomCode: string): string {
             <th class="py-1.5 px-3">Keterangan</th>
           </tr>
         </thead>
-        <tbody id="logsTableBody" class="divide-y divide-slate-100 font-medium">
-          <tr><td colspan="5" class="py-3 text-center text-[#777777]">Memuat log...</td></tr>
+        <tbody id="logsTableBody" class="divide-y divide-[#E5E7EB]">
+          <tr><td colspan="5" class="py-3 text-center text-[#4A4A4A]">Memuat log...</td></tr>
         </tbody>
       </table>
     </div>
   </footer>
 
   <!-- Modal Emergency PIN -->
-  <div id="pinModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white border-2 border-[#bae6fd] rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-xl">
-      <h3 class="font-extrabold text-base text-[#3c3c3c]">Emergency Manual PIN</h3>
-      <p class="text-xs text-[#777777] font-medium">Masukkan kode PIN petugas piket untuk membuka pintu darurat</p>
-      <input id="pinInput" type="password" maxlength="6" placeholder="PIN (1722)" class="w-full text-center tracking-widest text-xl py-2.5 bg-slate-50 border-2 border-slate-200 rounded-xl text-[#3c3c3c] font-bold focus:outline-none focus:border-[#0f766e]">
+  <div id="pinModal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E5E7EB] rounded-[4px] p-6 max-w-sm w-full text-center space-y-4">
+      <h3 class="font-bold text-base text-[#1A1A1A]">Emergency Manual PIN</h3>
+      <p class="text-xs text-[#4A4A4A]">Masukkan kode PIN petugas piket untuk membuka pintu darurat</p>
+      <input id="pinInput" type="password" maxlength="6" placeholder="PIN (1722)" class="w-full text-center tracking-widest text-xl py-2 bg-white border border-[#D1D5DB] rounded-[4px] text-[#1A1A1A] font-mono focus:outline-none focus:border-[#0066FF]">
       <div class="flex space-x-2 pt-2 text-xs">
-        <button onclick="closePinModal()" class="duo-btn-secondary flex-1 py-2 text-xs">Batal</button>
-        <button onclick="submitPin()" class="duo-btn-primary flex-1 py-2 text-xs">Buka Pintu</button>
+        <button onclick="closePinModal()" class="flat-btn-secondary flex-1 py-2 text-xs">Batal</button>
+        <button onclick="submitPin()" class="flat-btn-primary flex-1 py-2 text-xs">Buka Pintu</button>
       </div>
     </div>
   </div>
@@ -357,11 +356,11 @@ function getKioskHtml(roomCode: string): string {
 
         if (data.online) {
           netDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
-          netStatus.className = 'font-extrabold text-emerald-800';
+          netStatus.className = 'font-bold text-emerald-700';
           netStatus.innerText = 'Online';
         } else {
           netDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
-          netStatus.className = 'font-extrabold text-amber-800';
+          netStatus.className = 'font-bold text-amber-700';
           netStatus.innerText = 'Offline (Cache Aktif)';
         }
 
@@ -388,12 +387,12 @@ function getKioskHtml(roomCode: string): string {
             const time = new Date(l.timestamp).toLocaleTimeString('id-ID');
             const isGranted = l.result === 'granted';
             return \`
-              <tr class="hover:bg-[#ddf4ff]/20">
+              <tr class="hover:bg-[#F8F9FA]">
                 <td class="py-1.5 px-3 font-mono text-[10px]">\${time}</td>
-                <td class="py-1.5 px-3 uppercase text-[10px] font-extrabold">\${l.method}</td>
-                <td class="py-1.5 px-3 font-bold text-[#3c3c3c]">\${l.userName || l.identifier}</td>
-                <td class="py-1.5 px-3 font-extrabold \${isGranted ? 'text-emerald-700' : 'text-red-700'}">\${isGranted ? 'Diterima' : 'Ditolak'}</td>
-                <td class="py-1.5 px-3 text-[#777777] text-[10px]">\${l.reason || '-'}</td>
+                <td class="py-1.5 px-3 uppercase text-[10px] font-semibold">\${l.method}</td>
+                <td class="py-1.5 px-3 font-semibold text-[#1A1A1A]">\${l.userName || l.identifier}</td>
+                <td class="py-1.5 px-3 font-mono text-[10px] font-bold \${isGranted ? 'text-emerald-700' : 'text-red-700'}">[\${isGranted ? 'DITERIMA' : 'DITOLAK'}]</td>
+                <td class="py-1.5 px-3 text-[#4A4A4A] text-[10px]">\${l.reason || '-'}</td>
               </tr>
             \`;
           }).join('');
@@ -418,36 +417,36 @@ function getKioskHtml(roomCode: string): string {
       if (resetTimer) clearTimeout(resetTimer);
 
       if (result.action === 'open') {
-        card.className = 'bg-emerald-50 border-2 border-emerald-400 rounded-3xl p-8 shadow-sm text-center space-y-4 min-h-[280px] flex flex-col justify-center items-center';
-        icon.className = 'w-20 h-20 rounded-2xl bg-emerald-100 border-2 border-emerald-300 text-emerald-800 flex items-center justify-center text-4xl mb-2';
+        card.className = 'bg-[#DCFCE7] border border-[#86EFAC] rounded-[4px] p-8 text-center space-y-3 min-h-[260px] flex flex-col justify-center items-center';
+        icon.className = 'w-16 h-16 rounded-[4px] bg-white border border-[#86EFAC] text-emerald-800 flex items-center justify-center text-3xl mb-1';
         icon.innerText = '✅';
         title.innerText = 'AKSES DITERIMA';
-        title.className = 'text-2xl font-extrabold text-emerald-900 tracking-tight';
+        title.className = 'text-2xl font-bold text-emerald-900 tracking-tight';
         desc.innerText = 'Silakan masuk, ' + (result.name || 'Pengguna');
-        desc.className = 'text-sm text-emerald-800 font-bold max-w-md';
+        desc.className = 'text-xs text-emerald-800 font-semibold max-w-md';
         if (result.remainingMinutes !== undefined) {
-          badge.className = 'px-4 py-1.5 bg-emerald-100 border border-emerald-400 text-emerald-900 rounded-full text-xs font-extrabold';
+          badge.className = 'px-3 py-1 bg-white border border-[#16A34A] text-emerald-900 rounded-[2px] text-xs font-mono font-bold';
           document.getElementById('remainingTime').innerText = result.remainingMinutes + ' menit';
         }
       } else {
-        card.className = 'bg-red-50 border-2 border-red-400 rounded-3xl p-8 shadow-sm text-center space-y-4 min-h-[280px] flex flex-col justify-center items-center';
-        icon.className = 'w-20 h-20 rounded-2xl bg-red-100 border-2 border-red-300 text-red-800 flex items-center justify-center text-4xl mb-2';
+        card.className = 'bg-[#FEE2E2] border border-[#FCA5A5] rounded-[4px] p-8 text-center space-y-3 min-h-[260px] flex flex-col justify-center items-center';
+        icon.className = 'w-16 h-16 rounded-[4px] bg-white border border-[#FCA5A5] text-red-800 flex items-center justify-center text-3xl mb-1';
         icon.innerText = '⛔';
         title.innerText = 'AKSES DITOLAK';
-        title.className = 'text-2xl font-extrabold text-red-900 tracking-tight';
+        title.className = 'text-2xl font-bold text-red-900 tracking-tight';
         desc.innerText = result.reason || result.message || 'Tidak memiliki izin akses';
-        desc.className = 'text-sm text-red-800 font-bold max-w-md';
+        desc.className = 'text-xs text-red-800 font-semibold max-w-md';
         badge.className = 'hidden';
       }
 
       resetTimer = setTimeout(() => {
-        card.className = 'bg-white border-2 border-[#bae6fd] rounded-3xl p-8 shadow-sm text-center space-y-4 min-h-[280px] flex flex-col justify-center items-center';
-        icon.className = 'w-20 h-20 rounded-2xl bg-[#ddf4ff] border-2 border-[#bae6fd] flex items-center justify-center text-4xl mb-2 text-[#0f766e]';
+        card.className = 'bg-white border border-[#E5E7EB] rounded-[4px] p-8 text-center space-y-3 min-h-[260px] flex flex-col justify-center items-center';
+        icon.className = 'w-16 h-16 rounded-[4px] bg-[#F8F9FA] border border-[#E5E7EB] flex items-center justify-center text-3xl mb-1 text-[#1A1A1A]';
         icon.innerText = '🚪';
         title.innerText = 'Tempelkan KTM atau Tunjukkan QR';
-        title.className = 'text-2xl font-extrabold text-[#3c3c3c] tracking-tight';
+        title.className = 'text-2xl font-bold text-[#1A1A1A] tracking-tight';
         desc.innerText = 'Akses pintu tervalidasi secara instan menggunakan RFID atau tiket QR. Tetap berfungsi penuh saat internet offline.';
-        desc.className = 'text-xs text-[#777777] max-w-md font-medium';
+        desc.className = 'text-xs text-[#4A4A4A] max-w-md';
         badge.className = 'hidden';
       }, 5000);
 

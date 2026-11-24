@@ -42,11 +42,11 @@ export default function ApiDocsPage() {
   }, []);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border-2 border-[#bae6fd] overflow-hidden">
-      <div className="px-6 py-4 bg-[#0f766e] border-b-4 border-[#134e4a] text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div className="bg-white border border-[#E5E7EB] rounded-[4px] overflow-hidden">
+      <div className="px-6 py-4 bg-[#1A1A1A] text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold tracking-tight">Dokumentasi Interaktif API (Swagger UI)</h1>
-          <p className="text-xs text-teal-100 font-medium">
+          <h1 className="text-base sm:text-lg font-bold tracking-tight">Dokumentasi Interaktif API (Swagger UI)</h1>
+          <p className="text-xs text-gray-300">
             OpenAPI 3.0 Spesifikasi Teknis &bull; Inter-Service REST & Endpoint Pengguna
           </p>
         </div>
@@ -54,7 +54,7 @@ export default function ApiDocsPage() {
           href="/api/openapi"
           target="_blank"
           download="openapi.yaml"
-          className="btn-accent px-3.5 py-1.5 text-xs font-bold"
+          className="btn-accent px-3 py-1.5 text-xs font-semibold"
         >
           Unduh openapi.yaml
         </a>

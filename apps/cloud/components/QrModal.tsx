@@ -16,11 +16,11 @@ export default function QrModal({ booking, onClose }: QrModalProps) {
   useEffect(() => {
     if (booking?.qrToken && canvasRef.current) {
       QRCode.toCanvas(canvasRef.current, booking.qrToken, {
-        width: 256,
-        margin: 2,
+        width: 240,
+        margin: 1,
         color: {
-          dark: '#0f766e',
-          light: '#ffffff',
+          dark: '#1A1A1A',
+          light: '#FFFFFF',
         },
         errorCorrectionLevel: 'M',
       }).catch((err) => {
@@ -47,71 +47,71 @@ export default function QrModal({ booking, onClose }: QrModalProps) {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden border-2 border-[#bae6fd]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white border border-[#E5E7EB] rounded-[4px] max-w-sm w-full overflow-hidden">
         {/* Header Modal */}
-        <div className="bg-[#0f766e] border-b-4 border-[#134e4a] px-5 py-4 text-white flex justify-between items-center">
+        <div className="bg-[#1A1A1A] px-4 py-3 text-white flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <QrCode className="w-5 h-5 text-white" />
-            <h3 className="font-extrabold text-sm tracking-wide">Tiket Akses LabGate</h3>
+            <QrCode className="w-4 h-4 text-white" />
+            <h3 className="font-semibold text-xs tracking-wider uppercase">Tiket Akses LabGate</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-teal-100 hover:text-white rounded-lg transition"
+            className="p-1 text-gray-400 hover:text-white transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 text-center space-y-4">
+        <div className="p-5 text-center space-y-4 text-xs">
           <div>
-            <span className="text-[10px] uppercase font-extrabold tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300 inline-block">
-              Disetujui &bull; Tiket Terverifikasi
+            <span className="font-mono text-[10px] uppercase font-bold text-[#16A34A] block">
+              [Status: Disetujui / Terverifikasi]
             </span>
-            <h4 className="font-extrabold text-base text-[#3c3c3c] mt-2.5">
+            <h4 className="font-bold text-base text-[#1A1A1A] mt-1">
               {booking.userName}
             </h4>
-            <p className="text-[11px] text-[#777777] font-medium">ID: {booking.id}</p>
+            <p className="text-[11px] text-[#4A4A4A] font-mono">ID: {booking.id}</p>
           </div>
 
           {/* QR Code Canvas */}
-          <div className="flex justify-center p-3 bg-[#ddf4ff]/50 rounded-2xl border-2 border-[#bae6fd]">
+          <div className="flex justify-center p-3 bg-white border border-[#E5E7EB] rounded-[2px]">
             {booking.qrToken ? (
-              <canvas ref={canvasRef} className="rounded-xl shadow-sm" />
+              <canvas ref={canvasRef} />
             ) : (
-              <div className="p-8 text-[#777777] text-xs">Tiket QR tidak tersedia</div>
+              <div className="p-8 text-[#4A4A4A] text-xs">Tiket QR tidak tersedia</div>
             )}
           </div>
 
           {/* Detail Informasi */}
-          <div className="bg-[#f8fafc] rounded-xl p-3.5 text-left text-xs space-y-2 border border-slate-200">
-            <div className="flex items-start space-x-2 text-[#3c3c3c]">
-              <MapPin className="w-4 h-4 text-[#0f766e] shrink-0 mt-0.5" />
+          <div className="bg-[#F8F9FA] rounded-[2px] p-3 text-left space-y-1.5 border border-[#E5E7EB]">
+            <div className="flex items-start space-x-2 text-[#1A1A1A]">
+              <MapPin className="w-3.5 h-3.5 text-[#0066FF] shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold block">{booking.roomName || booking.roomId}</span>
-                <span className="text-[#777777] text-[11px]">Kode Gate: {booking.roomCode || booking.roomId}</span>
+                <span className="font-semibold block">{booking.roomName || booking.roomId}</span>
+                <span className="text-[#4A4A4A] text-[11px]">Kode Gate: {booking.roomCode || booking.roomId}</span>
               </div>
             </div>
 
-            <div className="flex items-start space-x-2 text-[#3c3c3c]">
-              <Clock className="w-4 h-4 text-[#0f766e] shrink-0 mt-0.5" />
+            <div className="flex items-start space-x-2 text-[#1A1A1A]">
+              <Clock className="w-3.5 h-3.5 text-[#0066FF] shrink-0 mt-0.5" />
               <div>
-                <span className="font-medium block">{dateStr}</span>
-                <span className="font-extrabold text-[#0f766e]">{startStr} - {endStr} WIB</span>
+                <span className="block text-[#4A4A4A]">{dateStr}</span>
+                <span className="font-semibold">{startStr} - {endStr} WIB</span>
               </div>
             </div>
           </div>
 
           {/* Footer Note */}
-          <div className="flex items-center justify-center space-x-1.5 text-[11px] text-teal-900 bg-teal-50 p-2.5 rounded-xl border border-teal-200">
-            <ShieldCheck className="w-4 h-4 text-[#0f766e] shrink-0" />
-            <span className="font-bold">Tanda tangan Ed25519 &bull; Valid offline</span>
+          <div className="flex items-center justify-center space-x-1.5 text-[11px] text-[#4A4A4A] border-t border-[#E5E7EB] pt-2">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#16A34A] shrink-0" />
+            <span>Tanda tangan Ed25519 &bull; Valid offline</span>
           </div>
 
           <button
             onClick={onClose}
-            className="w-full btn-secondary py-2.5 text-xs font-bold"
+            className="w-full btn-secondary py-2 text-xs"
           >
             Tutup
           </button>

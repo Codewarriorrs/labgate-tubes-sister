@@ -9,7 +9,6 @@ import {
   ClipboardList,
   CreditCard,
   History,
-  FileCode,
   LogOut,
   User as UserIcon,
 } from 'lucide-react';
@@ -33,43 +32,44 @@ export default function Navbar({ user }: NavbarProps) {
     }
   };
 
-  const isMahasiswa = user?.role === 'mahasiswa';
   const isDosen = user?.role === 'dosen';
   const isAdmin = user?.role === 'admin';
 
+  // Catatan: Sesuai instruksi, API Docs tidak dibuatin button di navbar utama
   const navItems = [
     { label: 'Booking Lab', href: '/dashboard', icon: CalendarCheck, show: true },
     { label: 'Approval', href: '/approval', icon: ClipboardList, show: isDosen || isAdmin },
     { label: 'Ruangan & Gate', href: '/rooms', icon: DoorClosed, show: isAdmin },
     { label: 'Kartu KTM', href: '/cards', icon: CreditCard, show: isAdmin },
     { label: 'Log Akses', href: '/logs', icon: History, show: isDosen || isAdmin },
-    { label: 'API Docs', href: '/api-docs', icon: FileCode, show: true },
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b-2 border-[#bae6fd] shadow-sm">
+    <header className="sticky top-0 z-40 bg-white border-b border-[#E5E7EB]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo & Kampus Title */}
           <div className="flex items-center space-x-3">
-            <Link href="/dashboard" className="flex items-center space-x-2.5 group">
-              <div className="w-10 h-10 rounded-xl bg-[#0f766e] border-b-4 border-[#134e4a] flex items-center justify-center text-white font-extrabold text-lg shadow-sm transition-transform group-hover:scale-105">
-                LG
-              </div>
+            <Link href="/" className="flex items-center space-x-2.5">
+              <img
+                src="/logo-labgate.png"
+                alt="LabGate Logo"
+                className="w-8 h-8 object-contain"
+              />
               <div>
-                <span className="font-extrabold text-lg text-[#3c3c3c] tracking-tight block leading-tight">
+                <span className="font-bold text-base text-[#1A1A1A] tracking-tight block leading-tight">
                   LabGate
                 </span>
-                <span className="text-[11px] text-[#777777] font-bold block">
-                  Akses Lab Terintegrasi
+                <span className="text-[11px] text-[#4A4A4A] block">
+                  Integrated Laboratory Access
                 </span>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          {user && (
-            <nav className="hidden md:flex items-center space-x-1.5">
+          {user ? (
+            <nav className="hidden md:flex items-center space-x-1">
               {navItems
                 .filter((item) => item.show)
                 .map((item) => {
@@ -79,60 +79,71 @@ export default function Navbar({ user }: NavbarProps) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`inline-flex items-center px-3.5 py-2 text-xs font-bold rounded-xl transition-all ${
+                      className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-[4px] transition-colors ${
                         isActive
-                          ? 'bg-[#0f766e] text-white border-b-4 border-[#134e4a]'
-                          : 'text-[#3c3c3c] hover:bg-[#ddf4ff] hover:text-[#0f766e]'
+                          ? 'bg-[#1A1A1A] text-white'
+                          : 'text-[#4A4A4A] hover:text-[#1A1A1A] hover:bg-[#F3F4F6]'
                       }`}
                     >
-                      <Icon className="w-4 h-4 mr-1.5" />
+                      <Icon className="w-3.5 h-3.5 mr-1.5" />
                       {item.label}
                     </Link>
                   );
                 })}
             </nav>
+          ) : (
+            <nav className="hidden md:flex items-center space-x-2">
+              <Link
+                href="/"
+                className={`px-3 py-1.5 text-xs font-semibold rounded-[4px] transition-colors ${
+                  pathname === '/' ? 'text-[#0066FF]' : 'text-[#4A4A4A] hover:text-[#1A1A1A]'
+                }`}
+              >
+                Beranda
+              </Link>
+            </nav>
           )}
 
           {/* User Info & Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {user ? (
               <div className="flex items-center space-x-3">
                 <div className="hidden sm:block text-right">
-                  <span className="text-xs font-bold text-[#3c3c3c] block leading-tight">
+                  <span className="text-xs font-bold text-[#1A1A1A] block leading-tight">
                     {user.name}
                   </span>
-                  <div className="flex items-center justify-end space-x-1.5 mt-0.5">
-                    <span
-                      className={`inline-block px-2 py-0.5 text-[10px] font-extrabold rounded-lg uppercase ${
-                        user.role === 'admin'
-                          ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                          : user.role === 'dosen'
-                          ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                          : 'bg-[#ddf4ff] text-[#0f766e] border border-[#bae6fd]'
-                      }`}
-                    >
-                      {user.role}
+                  <div className="flex items-center justify-end space-x-1.5 mt-0.5 text-[11px] text-[#4A4A4A]">
+                    <span className="font-mono uppercase font-semibold text-[#0066FF]">
+                      [{user.role}]
                     </span>
-                    <span className="text-[11px] text-[#777777] font-medium">{user.department}</span>
+                    <span>&bull;</span>
+                    <span>{user.department}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={handleLogout}
                   title="Keluar"
-                  className="p-2 text-[#777777] hover:text-[#ef4444] hover:bg-red-50 rounded-xl transition-colors"
+                  className="p-1.5 text-[#4A4A4A] hover:text-[#DC2626] hover:bg-[#FEE2E2] rounded-[4px] transition-colors"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="btn-primary px-4 py-2 text-xs font-bold"
-              >
-                <UserIcon className="w-4 h-4 mr-1.5" />
-                Masuk
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link
+                  href="/login"
+                  className="btn-secondary px-3.5 py-1.5 text-xs"
+                >
+                  Masuk
+                </Link>
+                <Link
+                  href="/register"
+                  className="btn-primary px-3.5 py-1.5 text-xs"
+                >
+                  Daftar
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -140,7 +151,7 @@ export default function Navbar({ user }: NavbarProps) {
 
       {/* Mobile Submenu Bar */}
       {user && (
-        <div className="md:hidden border-t border-[#bae6fd] px-2 py-2 flex overflow-x-auto space-x-1.5 bg-[#f0f9ff]">
+        <div className="md:hidden border-t border-[#E5E7EB] px-2 py-1.5 flex overflow-x-auto space-x-1 bg-[#F8F9FA]">
           {navItems
             .filter((item) => item.show)
             .map((item) => {
@@ -150,10 +161,10 @@ export default function Navbar({ user }: NavbarProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center px-3 py-1.5 text-xs font-bold whitespace-nowrap rounded-lg transition-all ${
+                  className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold whitespace-nowrap rounded-[4px] transition-colors ${
                     isActive
-                      ? 'bg-[#0f766e] text-white border-b-2 border-[#134e4a]'
-                      : 'text-[#3c3c3c] hover:bg-[#ddf4ff]'
+                      ? 'bg-[#1A1A1A] text-white'
+                      : 'text-[#4A4A4A] hover:bg-[#E5E7EB]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5 mr-1" />

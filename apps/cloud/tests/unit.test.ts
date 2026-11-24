@@ -53,14 +53,15 @@ describe('Cloud Service 1 Unit Tests', () => {
 
   describe('Verifikasi Tiket Kriptografi Ed25519', () => {
     it('berhasil memverifikasi token bertanda tangan sah', async () => {
+      const now = Date.now();
       const payload = {
         bookingId: 'bkg_unit_test_01',
         roomId: 'lab-01',
         roomCode: 'lab-01',
         userId: 'usr_mhs_01',
         userName: 'Muhammad Isya Asyhari',
-        startTime: '2026-11-24T10:00:00.000Z',
-        endTime: '2026-11-24T12:00:00.000Z',
+        startTime: new Date(now - 1000).toISOString(),
+        endTime: new Date(now + 7200 * 1000).toISOString(),
       };
 
       const token = await signQrTicket(payload);

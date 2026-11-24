@@ -85,57 +85,52 @@ export default function ApprovalPage() {
   const pastBookings = bookings.filter((b) => b.status !== 'menunggu');
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      {/* Header */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 border-2 border-[#bae6fd] shadow-sm">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#0f766e] bg-[#ddf4ff] px-2.5 py-1 rounded-lg border border-[#bae6fd] inline-block mb-2">
-          Portal Dosen & Admin
-        </span>
-        <h1 className="text-xl sm:text-2xl font-extrabold text-[#3c3c3c] tracking-tight">
+    <div className="space-y-6">
+      {/* Header: Direct Typography, no nested boxes, no pill badges */}
+      <div className="border-b border-[#E5E7EB] pb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight">
           Antrean Persetujuan Peminjaman Lab
         </h1>
-        <p className="text-xs text-[#777777] font-medium mt-1">
-          Halaman dosen pembimbing & admin laboratorium untuk menyetujui atau menolak permohonan akses
+        <p className="text-xs text-[#4A4A4A] mt-1">
+          Halaman dosen pembimbing & pengelola lab untuk menyetujui atau menolak permohonan akses
         </p>
       </div>
 
       {feedback && (
         <div
-          className={`p-4 rounded-xl text-xs font-bold flex items-start space-x-2.5 border-2 ${
+          className={`p-3 rounded-[4px] text-xs font-semibold flex items-start space-x-2 border ${
             feedback.type === 'success'
-              ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
-              : 'bg-red-50 text-red-900 border-red-300'
+              ? 'bg-[#DCFCE7] text-[#15803D] border-[#86EFAC]'
+              : 'bg-[#FEE2E2] text-[#DC2626] border-[#FCA5A5]'
           }`}
         >
           {feedback.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
           ) : (
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           )}
           <span>{feedback.message}</span>
         </div>
       )}
 
       {/* Daftar Antrean Pending */}
-      <div className="bg-white rounded-2xl shadow-sm border-2 border-[#bae6fd] p-5 sm:p-6">
-        <div className="flex items-center justify-between pb-4 border-b-2 border-slate-100 mb-5">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#0f766e] flex items-center justify-center text-white font-bold">
-              <ClipboardCheck className="w-4 h-4" />
-            </div>
-            <h2 className="text-sm sm:text-base font-extrabold text-[#3c3c3c]">
+      <div className="bg-white border border-[#E5E7EB] rounded-[4px] p-5 space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB]">
+          <div className="flex items-center space-x-2">
+            <ClipboardCheck className="w-4 h-4 text-[#0066FF]" />
+            <h2 className="text-sm sm:text-base font-bold text-[#1A1A1A]">
               Permohonan Menunggu Keputusan
             </h2>
           </div>
-          <span className="px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-lg font-extrabold text-xs">
-            {pendingBookings.length} Antrean
+          <span className="font-mono text-xs font-bold text-[#D97706]">
+            [{pendingBookings.length} Antrean]
           </span>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-[#777777] text-xs font-bold">Memuat antrean...</div>
+          <div className="p-8 text-center text-[#4A4A4A] text-xs font-semibold">Memuat antrean...</div>
         ) : pendingBookings.length === 0 ? (
-          <div className="p-8 text-center text-[#777777] text-xs font-medium">
+          <div className="p-8 text-center text-[#4A4A4A] text-xs">
             Tidak ada permohonan booking yang menunggu persetujuan saat ini.
           </div>
         ) : (
@@ -156,55 +151,55 @@ export default function ApprovalPage() {
               return (
                 <div
                   key={b.id}
-                  className="rounded-2xl border-2 border-slate-200 p-4 hover:border-[#bae6fd] hover:bg-[#ddf4ff]/20 transition flex flex-col justify-between space-y-3 bg-white"
+                  className="rounded-[4px] border border-[#E5E7EB] p-4 flex flex-col justify-between space-y-3 bg-[#F8F9FA] hover:border-[#1A1A1A] transition"
                 >
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="font-extrabold text-[#3c3c3c] text-sm block">
+                        <span className="font-bold text-[#1A1A1A] text-sm block">
                           {b.userName}
                         </span>
-                        <span className="text-[#777777] text-[11px] block">{b.id}</span>
+                        <span className="text-[#4A4A4A] text-[11px] font-mono block">{b.id}</span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-[10px] uppercase">
-                        Menunggu Approval
+                      <span className="font-mono text-[10px] uppercase font-bold text-[#D97706]">
+                        [Menunggu]
                       </span>
                     </div>
 
-                    <div className="space-y-1 text-[#3c3c3c]">
+                    <div className="space-y-1 text-[#1A1A1A]">
                       <div className="flex items-center space-x-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#0f766e]" />
-                        <span className="font-bold">
+                        <MapPin className="w-3.5 h-3.5 text-[#0066FF]" />
+                        <span className="font-semibold">
                           {b.roomName || b.roomId} ({b.roomCode || b.roomId})
                         </span>
                       </div>
 
                       {b.equipmentName && (
-                        <div className="flex items-center space-x-1.5">
-                          <Cpu className="w-3.5 h-3.5 text-[#0f766e]" />
-                          <span className="text-[#3c3c3c] font-medium">Alat: {b.equipmentName}</span>
+                        <div className="flex items-center space-x-1.5 text-[#4A4A4A]">
+                          <Cpu className="w-3.5 h-3.5 text-[#0066FF]" />
+                          <span>Alat: {b.equipmentName}</span>
                         </div>
                       )}
 
-                      <div className="flex items-center space-x-1.5">
-                        <Clock className="w-3.5 h-3.5 text-[#0f766e]" />
-                        <span className="font-medium">{startStr} - {endStr} WIB</span>
+                      <div className="flex items-center space-x-1.5 text-[#4A4A4A]">
+                        <Clock className="w-3.5 h-3.5 text-[#0066FF]" />
+                        <span>{startStr} - {endStr} WIB</span>
                       </div>
                     </div>
 
-                    <div className="bg-[#f8fafc] p-3 rounded-xl border border-slate-200">
-                      <span className="text-[10px] uppercase font-bold text-[#777777] block mb-1">
+                    <div className="bg-white p-2.5 rounded-[2px] border border-[#E5E7EB]">
+                      <span className="text-[10px] uppercase font-semibold text-[#4A4A4A] block mb-0.5">
                         Keperluan Penggunaan:
                       </span>
-                      <p className="text-[#3c3c3c] italic font-medium">{b.purpose}</p>
+                      <p className="text-[#1A1A1A] font-medium">{b.purpose}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2 pt-2 border-t-2 border-slate-100">
+                  <div className="flex items-center space-x-2 pt-2 border-t border-[#E5E7EB]">
                     <button
                       onClick={() => handleApprove(b.id)}
                       disabled={actionLoading}
-                      className="flex-1 py-2 px-3 bg-[#0f766e] hover:bg-[#115e59] text-white rounded-xl text-xs font-extrabold border-b-4 border-[#134e4a] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center space-x-1 disabled:opacity-50"
+                      className="flex-1 btn-primary py-1.5 text-xs flex items-center justify-center space-x-1 disabled:opacity-50"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Setujui</span>
@@ -215,7 +210,7 @@ export default function ApprovalPage() {
                         setRejectionReason('');
                       }}
                       disabled={actionLoading}
-                      className="flex-1 py-2 px-3 bg-[#ef4444] hover:bg-[#dc2626] text-white rounded-xl text-xs font-extrabold border-b-4 border-[#b91c1c] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center space-x-1 disabled:opacity-50"
+                      className="flex-1 btn-danger py-1.5 text-xs flex items-center justify-center space-x-1 disabled:opacity-50"
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       <span>Tolak</span>
@@ -229,54 +224,54 @@ export default function ApprovalPage() {
       </div>
 
       {/* Riwayat Keputusan */}
-      <div className="bg-white rounded-2xl shadow-sm border-2 border-[#bae6fd] overflow-hidden">
-        <div className="px-6 py-4 border-b-2 border-slate-100">
-          <h2 className="text-sm sm:text-base font-extrabold text-[#3c3c3c]">
+      <div className="bg-white border border-[#E5E7EB] rounded-[4px] overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-[#E5E7EB]">
+          <h2 className="text-sm sm:text-base font-bold text-[#1A1A1A]">
             Riwayat Keputusan Approval
           </h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#3c3c3c]">
-            <thead className="bg-[#f0f9ff] text-[10px] font-extrabold text-[#777777] uppercase tracking-wider border-b-2 border-slate-100">
+          <table className="w-full text-left text-xs text-[#1A1A1A]">
+            <thead className="bg-[#F8F9FA] text-[11px] font-semibold text-[#4A4A4A] uppercase tracking-wider border-b border-[#E5E7EB]">
               <tr>
-                <th className="px-5 py-3">ID & Pengguna</th>
-                <th className="px-5 py-3">Ruangan</th>
-                <th className="px-5 py-3">Waktu</th>
-                <th className="px-5 py-3">Keperluan</th>
-                <th className="px-5 py-3">Status / Alasan</th>
+                <th className="px-5 py-2.5">ID & Pengguna</th>
+                <th className="px-5 py-2.5">Ruangan</th>
+                <th className="px-5 py-2.5">Waktu</th>
+                <th className="px-5 py-2.5">Keperluan</th>
+                <th className="px-5 py-2.5">Status / Alasan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
+            <tbody className="divide-y divide-[#E5E7EB]">
               {pastBookings.map((b) => (
-                <tr key={b.id} className="hover:bg-[#ddf4ff]/20 transition">
-                  <td className="px-5 py-3.5">
-                    <span className="font-extrabold text-[#3c3c3c] block">{b.id}</span>
-                    <span className="text-[#777777] text-[11px]">{b.userName}</span>
+                <tr key={b.id} className="hover:bg-[#F8F9FA] transition">
+                  <td className="px-5 py-3">
+                    <span className="font-semibold text-[#1A1A1A] block">{b.id}</span>
+                    <span className="text-[#4A4A4A] text-[11px]">{b.userName}</span>
                   </td>
-                  <td className="px-5 py-3.5 font-bold text-[#3c3c3c]">
+                  <td className="px-5 py-3 font-medium">
                     {b.roomName || b.roomId}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-5 py-3 text-[#4A4A4A]">
                     {new Date(b.startTime).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}{' '}
                     {new Date(b.startTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  <td className="px-5 py-3.5 max-w-xs truncate" title={b.purpose}>
+                  <td className="px-5 py-3 max-w-xs truncate" title={b.purpose}>
                     {b.purpose}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-5 py-3">
                     <span
-                      className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase border ${
+                      className={`font-mono text-[11px] uppercase font-bold ${
                         b.status === 'disetujui'
-                          ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                          ? 'text-[#16A34A]'
                           : b.status === 'ditolak'
-                          ? 'bg-red-100 text-red-900 border-red-300'
-                          : 'bg-slate-100 text-[#777777] border-slate-200'
+                          ? 'text-[#DC2626]'
+                          : 'text-[#4A4A4A]'
                       }`}
                     >
-                      {b.status}
+                      [{b.status}]
                     </span>
                     {b.rejectionReason && (
-                      <span className="block text-[10px] text-red-700 mt-0.5 font-bold">{b.rejectionReason}</span>
+                      <span className="block text-[11px] text-[#DC2626] mt-0.5 truncate max-w-xs">{b.rejectionReason}</span>
                     )}
                   </td>
                 </tr>
@@ -288,42 +283,42 @@ export default function ApprovalPage() {
 
       {/* Modal Tolak Booking */}
       {rejectingBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border-2 border-[#bae6fd]">
-            <h3 className="font-extrabold text-sm sm:text-base text-[#3c3c3c] mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white border border-[#E5E7EB] rounded-[4px] max-w-md w-full p-6 space-y-4">
+            <h3 className="font-bold text-base text-[#1A1A1A]">
               Tolak Permohonan Peminjaman ({rejectingBooking.id})
             </h3>
-            <p className="text-xs text-[#777777] font-medium mb-4">
+            <p className="text-xs text-[#4A4A4A]">
               Sebutkan alasan penolakan secara jelas agar mahasiswa dapat memperbaiki jadwal atau permohonannya.
             </p>
 
             <form onSubmit={handleRejectSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#3c3c3c] mb-1">
+                <label className="block text-xs font-semibold text-[#1A1A1A] mb-1">
                   Catatan Alasan Penolakan
                 </label>
                 <textarea
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Contoh: Bentrok dengan praktikum reguler mahasiswa D3..."
+                  placeholder="Contoh: Bentrok dengan praktikum reguler mahasiswa..."
                   rows={3}
                   required
-                  className="w-full px-3.5 py-2.5 text-xs font-medium rounded-xl border-2 border-slate-200 focus:outline-none focus:border-[#ef4444]"
+                  className="w-full px-3 py-2 text-xs rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#DC2626] bg-white text-[#1A1A1A]"
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
+              <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E7EB]">
                 <button
                   type="button"
                   onClick={() => setRejectingBooking(null)}
-                  className="btn-secondary px-4 py-2 text-xs"
+                  className="btn-secondary px-4 py-1.5 text-xs"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="btn-danger px-4 py-2 text-xs"
+                  className="btn-danger px-4 py-1.5 text-xs"
                 >
                   {actionLoading ? 'Menolak...' : 'Konfirmasi Tolak'}
                 </button>

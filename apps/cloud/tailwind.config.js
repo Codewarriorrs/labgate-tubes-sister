@@ -8,51 +8,47 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0f766e', // Dark Tosca / Teal
-          hover: '#115e59',
-          dark: '#134e4a',
-          light: '#14b8a6',
-          border: '#134e4a',
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
+          DEFAULT: '#1A1A1A',
+          hover: '#333333',
+          dark: '#000000',
         },
-        background: '#ddf4ff', // Duolingo pale sky canvas
-        canvas: '#ddf4ff',
-        surface: {
-          DEFAULT: '#ffffff',
-          strong: '#f8fafc',
-          subtle: '#f1f5f9',
-          border: '#dbeafe',
+        secondary: {
+          DEFAULT: '#4A4A4A',
+          hover: '#666666',
         },
-        text: {
-          DEFAULT: '#3c3c3c', // Duolingo charcoal body text
-          muted: '#777777',   // Duolingo gray
-          dark: '#111111',
+        tertiary: {
+          DEFAULT: '#0066FF',
+          hover: '#0052CC',
         },
         accent: {
-          DEFAULT: '#1cb0f6', // Duolingo vivid sky blue accent
-          hover: '#0284c7',
-          dark: '#0369a1',
+          DEFAULT: '#0066FF',
+          hover: '#0052CC',
         },
-        mint: {
-          DEFAULT: '#10b981',
-          hover: '#059669',
-          dark: '#047857',
+        canvas: '#FFFFFF',
+        surface: {
+          DEFAULT: '#FFFFFF',
+          muted: '#F8F9FA',
+          border: '#E5E7EB',
+          subtle: '#F3F4F6',
         },
         danger: {
-          DEFAULT: '#ef4444',
-          hover: '#dc2626',
-          dark: '#b91c1c',
+          DEFAULT: '#DC2626',
+          hover: '#B91C1C',
+        },
+        success: {
+          DEFAULT: '#16A34A',
+          hover: '#15803D',
         },
       },
       fontFamily: {
-        sans: ['Quicksand', 'Nunito', 'system-ui', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       borderRadius: {
-        'xl': '12px',
-        '2xl': '16px',
-        '3xl': '20px',
+        sm: '2px',
+        DEFAULT: '4px',
+        md: '4px',
+        lg: '8px',
       },
     },
   },
