@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Unlock, AlertCircle, CheckCircle2, QrCode, X } from 'lucide-react';
 import { Room } from '@/types';
+import { invalidateCache } from '@/lib/clientCache';
 
 export default function RoomsPage() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function RoomsPage() {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/rooms');
+      const res = await fetch('/api/rooms', { cache: 'no-store' });
       if (res.status === 401) {
         router.push('/login');
         return;
@@ -76,6 +77,7 @@ export default function RoomsPage() {
       const res = await fetch(`/api/rooms/${roomId}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
+        invalidateCache('rooms');
         fetchRooms();
       } else {
         alert(json.message);
@@ -105,6 +107,7 @@ export default function RoomsPage() {
         setName('');
         setCode('');
         setDescription('');
+        invalidateCache('rooms');
         fetchRooms();
         setFeedback({ type: 'success', message: json.message });
       } else {

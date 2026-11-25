@@ -4,6 +4,8 @@ import { listBookings, createBooking, checkBookingConflict, getRoomById } from '
 import { getCurrentUser } from '@/lib/auth';
 import { BookingStatus } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 const createBookingSchema = z.object({
   roomId: z.string().min(1, 'Ruangan wajib dipilih'),
   equipmentId: z.union([z.string(), z.array(z.string())]).nullable().optional(),

@@ -469,7 +469,9 @@ export async function createRoom(data: Omit<Room, 'id' | 'createdAt' | 'apiKeyHa
         [newRoom.id, newRoom.name, newRoom.code, newRoom.capacity, newRoom.description, newRoom.apiKeyHash, newRoom.isActive, newRoom.createdAt]
       );
       return newRoom;
-    } catch {}
+    } catch (err) {
+      console.error('[createRoom DB Error]', err);
+    }
   }
 
   memoryStore.rooms.push(newRoom);

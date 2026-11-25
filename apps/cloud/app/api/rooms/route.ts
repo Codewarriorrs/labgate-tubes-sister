@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { listRooms, createRoom, listEquipment } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 const createRoomSchema = z.object({
   name: z.string().min(3, 'Nama ruangan minimal 3 karakter'),
   code: z.string().min(2, 'Kode ruangan minimal 2 karakter (contoh: lab-01)'),

@@ -23,7 +23,7 @@ const char* WIFI_PASS = "";
 // URL Cloud Production Anda (Vercel)
 const char* CLOUD_URL = "https://labgate-tubes-sister.vercel.app";
 
-const char* ROOM_CODE = "lab-01";
+const char* ROOM_CODE = "b.201";
 const char* EMERGENCY_PIN = "1722";
 
 // Pin Perangkat Keras

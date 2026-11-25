@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { listCards, createCard } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 const createCardSchema = z.object({
   userId: z.string().min(1, 'Pengguna wajib dipilih'),
   rawUid: z.string().min(4, 'UID kartu RFID minimal 4 karakter hex (contoh: 01020304)'),
