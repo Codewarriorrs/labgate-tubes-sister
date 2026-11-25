@@ -46,6 +46,7 @@ unsigned long currentSeq = 0;
 unsigned long stateTimer = 0;
 unsigned long holdDuration = 5000;
 unsigned long lastStatusPublish = 0;
+unsigned long lastMqttReconnectAttempt = 0;
 
 void setLcdIdle() {
   lcd.clear();
@@ -140,60 +141,124 @@ void publishStatus(const char* statusStr) {
   mqttClient.publish(statusTopic.c_str(), buffer);
 }
 
-void reconnectMqtt() {
-  while (!mqttClient.connected()) {
-    String clientId = "ESP32Gate-" + String(ROOM_CODE) + "-" + String(random(1000, 9999));
-    Serial.print("Mencoba koneksi MQTT ke " + String(MQTT_SERVER) + "...");
-    if (mqttClient.connect(clientId.c_str())) {
-      Serial.println("Berhasil!");
-      String cmdTopic = String(TOPIC_ROOT) + "/cmd";
-      mqttClient.subscribe(cmdTopic.c_str());
-      publishStatus("online");
-      setLcdIdle(); // Perbarui LCD seketika setelah MQTT terhubung
-    } else {
-      Serial.print("Gagal, rc=");
-      Serial.print(mqttClient.state());
-      Serial.println(" coba lagi dlm 2 detik");
-      delay(2000);
-    }
+bool tryConnectMqtt() {
+  if (WiFi.status() != WL_CONNECTED) return false;
+  String clientId = "ESP32Gate-" + String(ROOM_CODE) + "-" + String(random(1000, 9999));
+  Serial.print("Mencoba koneksi MQTT ke " + String(MQTT_SERVER) + "...");
+  if (mqttClient.connect(clientId.c_str())) {
+    Serial.println("Berhasil!");
+    String cmdTopic = String(TOPIC_ROOT) + "/cmd";
+    mqttClient.subscribe(cmdTopic.c_str());
+    publishStatus("online");
+    return true;
+  } else {
+    Serial.print("Gagal, rc=");
+    Serial.println(mqttClient.state());
+    return false;
   }
 }
 
 void setupWiFi() {
   WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  // Channel 6 adalah channel default Wokwi-GUEST agar koneksi instan tanpa scan semua channel
+  WiFi.begin(WIFI_SSID, WIFI_PASS, 6);
   Serial.print("Menghubungkan ke WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(300);
+  int attempts = 0;
+  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+    delay(250);
     Serial.print(".");
+    attempts++;
   }
-  Serial.println("\nWiFi Terhubung! IP: " + WiFi.localIP().toString());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi Terhubung! IP: " + WiFi.localIP().toString());
+  } else {
+    Serial.println("\n[INFO] WiFi lambat/offline, melanjutkan dalam Mode Offline Lokal.");
+  }
+}
+
+void grantAccessLocal(const char* userName) {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("AKSES DITERIMA");
+  lcd.setCursor(0, 1);
+  char truncatedName[17];
+  strncpy(truncatedName, userName, 16);
+  truncatedName[16] = '\0';
+  lcd.print(truncatedName);
+
+  digitalWrite(RELAY_PIN, HIGH);
+  digitalWrite(LED_GREEN, HIGH);
+  digitalWrite(LED_RED, LOW);
+  tone(BUZZER_PIN, 2000, 150);
+  delay(180);
+  tone(BUZZER_PIN, 2500, 150);
+
+  holdDuration = 5000;
+  currentState = STATE_DOOR_OPEN;
+  stateTimer = millis();
+}
+
+void denyAccessLocal(const char* reason) {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("AKSES DITOLAK");
+  lcd.setCursor(0, 1);
+  char truncatedReason[17];
+  strncpy(truncatedReason, reason, 16);
+  truncatedReason[16] = '\0';
+  lcd.print(truncatedReason);
+
+  digitalWrite(RELAY_PIN, LOW);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_RED, HIGH);
+  tone(BUZZER_PIN, 800, 600);
+
+  currentState = STATE_DENIED;
+  stateTimer = millis();
 }
 
 void triggerRfidScan(String uidStr) {
   uidStr.toLowerCase();
   Serial.println("\n[SCAN RFID] Memproses UID: " + uidStr);
 
-  currentSeq++;
-  StaticJsonDocument<128> doc;
-  doc["seq"] = currentSeq;
-  doc["room"] = ROOM_CODE;
-  doc["method"] = "rfid";
-  doc["uid"] = uidStr;
+  if (mqttClient.connected()) {
+    currentSeq++;
+    StaticJsonDocument<128> doc;
+    doc["seq"] = currentSeq;
+    doc["room"] = ROOM_CODE;
+    doc["method"] = "rfid";
+    doc["uid"] = uidStr;
 
-  char buffer[128];
-  serializeJson(doc, buffer);
-  String scanTopic = String(TOPIC_ROOT) + "/scan";
-  mqttClient.publish(scanTopic.c_str(), buffer);
+    char buffer[128];
+    serializeJson(doc, buffer);
+    String scanTopic = String(TOPIC_ROOT) + "/scan";
+    mqttClient.publish(scanTopic.c_str(), buffer);
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Memverifikasi...");
-  lcd.setCursor(0, 1);
-  lcd.print("UID: " + uidStr);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Memverifikasi...");
+    lcd.setCursor(0, 1);
+    lcd.print("UID: " + uidStr);
 
-  currentState = STATE_WAITING_RESPONSE;
-  stateTimer = millis();
+    currentState = STATE_WAITING_RESPONSE;
+    stateTimer = millis();
+  } else {
+    // Fallback Mode Offline Lokal jika MQTT / Gateway belum terhubung
+    Serial.println("[MODE OFFLINE] Memverifikasi UID secara lokal...");
+    if (uidStr == "01020304") {
+      Serial.println("[OFFLINE] AKSES DITERIMA -> Isya");
+      grantAccessLocal("Isya");
+    } else if (uidStr == "11223344") {
+      Serial.println("[OFFLINE] AKSES DITERIMA -> Malvin");
+      grantAccessLocal("Malvin");
+    } else if (uidStr == "55667788") {
+      Serial.println("[OFFLINE] AKSES DITERIMA -> Bintang");
+      grantAccessLocal("Bintang");
+    } else {
+      Serial.println("[OFFLINE] AKSES DITOLAK -> Kartu Tidak Dikenal");
+      denyAccessLocal("Kartu Tdk Sah");
+    }
+  }
 }
 
 void checkRfidHardware() {
@@ -262,7 +327,7 @@ void setup() {
   mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
   mqttClient.setCallback(mqttCallback);
 
-  reconnectMqtt();
+  tryConnectMqtt();
   setLcdIdle();
 
   Serial.println("\n================================================");
@@ -277,17 +342,23 @@ void setup() {
 }
 
 void loop() {
-  if (WiFi.status() != WL_CONNECTED) setupWiFi();
-  if (!mqttClient.connected()) reconnectMqtt();
-  mqttClient.loop();
-
-  // Heartbeat berkala tiap 30 detik
-  if (millis() - lastStatusPublish > 30000) {
-    publishStatus("online");
-    lastStatusPublish = millis();
-  }
-
   unsigned long now = millis();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    if (!mqttClient.connected()) {
+      if (now - lastMqttReconnectAttempt > 10000) {
+        lastMqttReconnectAttempt = now;
+        tryConnectMqtt();
+      }
+    } else {
+      mqttClient.loop();
+      // Heartbeat berkala tiap 30 detik
+      if (now - lastStatusPublish > 30000) {
+        publishStatus("online");
+        lastStatusPublish = now;
+      }
+    }
+  }
 
   switch (currentState) {
     case STATE_IDLE:
