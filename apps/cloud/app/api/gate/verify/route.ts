@@ -64,21 +64,23 @@ export async function POST(req: NextRequest) {
     const method = String(body.method || 'rfid').trim() as 'rfid' | 'qr' | 'manual_pin';
     const rawUid = String(body.uid || body.token || '').trim();
 
-    const rooms = await listRooms();
+    const [rooms, allCards] = await Promise.all([
+      listRooms(),
+      method === 'rfid' ? listCards() : Promise.resolve([]),
+    ]);
     const room = rooms.find((r) => r.code.toLowerCase() === roomCode.toLowerCase());
 
     if (!room) {
       return NextResponse.json({ action: 'deny', reason: 'Lab tdk ada' }, { status: 404 });
     }
 
-    await updateRoomHeartbeat(room.id, {
-      version: 'esp32-direct-1.0',
-      queueCount: 0,
-      lastSync: new Date().toISOString(),
-    });
-
     const now = new Date();
     const eventId = `evt_${crypto.randomUUID().slice(0, 12)}`;
+    const heartbeatPromise = updateRoomHeartbeat(room.id, {
+      version: 'esp32-direct-1.0',
+      queueCount: 0,
+      lastSync: now.toISOString(),
+    });
 
     // 1. Verifikasi PIN Darurat
     if (method === 'manual_pin') {
@@ -195,8 +197,8 @@ export async function POST(req: NextRequest) {
 
     // 2. Verifikasi Kartu KTM RFID
     const incomingHash = hashCardUid(rawUid);
-    const allCards = await listCards();
     const matchedCard = allCards.find((c) => c.uidHash === incomingHash);
+    await heartbeatPromise.catch(() => {});
 
     if (!matchedCard) {
       await insertAccessLogs([

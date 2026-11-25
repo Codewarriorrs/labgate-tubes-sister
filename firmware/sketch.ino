@@ -158,12 +158,15 @@ void verifyWithCloud(const char* method, String uidStr) {
 
   WiFiClientSecure secureClient;
   secureClient.setInsecure(); // Mengizinkan HTTPS ke Vercel / Ngrok tanpa pin sertifikat
+  secureClient.setTimeout(15);
 
   HTTPClient http;
   String endpoint = String(CLOUD_URL) + "/api/gate/verify";
   http.begin(secureClient, endpoint);
+  http.useHTTP10(true);
+  http.setReuse(false);
   http.addHeader("Content-Type", "application/json");
-  http.setTimeout(5000);
+  http.setTimeout(15000);
 
   StaticJsonDocument<128> reqDoc;
   reqDoc["room"] = ROOM_CODE;
@@ -206,11 +209,14 @@ void pollRemoteUnlock() {
 
   WiFiClientSecure secureClient;
   secureClient.setInsecure();
+  secureClient.setTimeout(10);
 
   HTTPClient http;
   String endpoint = String(CLOUD_URL) + "/api/gate/verify?room=" + String(ROOM_CODE);
+  http.useHTTP10(true);
+  http.setReuse(false);
   http.begin(secureClient, endpoint);
-  http.setTimeout(3000);
+  http.setTimeout(10000);
 
   int httpCode = http.GET();
   if (httpCode == 200) {
