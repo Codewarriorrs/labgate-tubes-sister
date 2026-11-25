@@ -160,10 +160,12 @@ export async function POST(request: NextRequest) {
       const confStart = new Date(conflict.conflictingBooking!.startTime).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Asia/Jakarta',
       });
       const confEnd = new Date(conflict.conflictingBooking!.endTime).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: 'Asia/Jakarta',
       });
       return NextResponse.json(
         {
