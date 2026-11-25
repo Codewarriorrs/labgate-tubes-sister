@@ -53,7 +53,7 @@
       "attrs": { "color": "red", "label": "Status: Denied" }
     },
     {
-      "type": "wokwi-keypad",
+      "type": "wokwi-membrane-keypad",
       "id": "keypad",
       "top": 200,
       "left": 380,
