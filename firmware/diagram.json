@@ -51,6 +51,13 @@
       "top": 90,
       "left": 380,
       "attrs": { "color": "red", "label": "Status: Denied" }
+    },
+    {
+      "type": "wokwi-keypad",
+      "id": "keypad",
+      "top": 200,
+      "left": 380,
+      "attrs": {}
     }
   ],
   "connections": [
@@ -82,7 +89,16 @@
     [ "led_green:A", "esp:15", "green", [ "v10", "h50", "v200", "h-140" ] ],
 
     [ "led_red:C", "esp:GND.2", "black", [ "v0", "h-80", "v-20", "h-30" ] ],
-    [ "led_red:A", "esp:4", "red", [ "v10", "h40", "v110", "h-120" ] ]
+    [ "led_red:A", "esp:4", "red", [ "v10", "h40", "v110", "h-120" ] ],
+
+    [ "keypad:R1", "esp:32", "cyan", [ "v20", "h-320", "v-240" ] ],
+    [ "keypad:R2", "esp:33", "cyan", [ "v30", "h-330", "v-230" ] ],
+    [ "keypad:R3", "esp:25", "cyan", [ "v40", "h-340", "v-220" ] ],
+    [ "keypad:R4", "esp:14", "cyan", [ "v50", "h-350", "v-210" ] ],
+    [ "keypad:C1", "esp:13", "magenta", [ "v60", "h-360", "v-200" ] ],
+    [ "keypad:C2", "esp:17", "magenta", [ "v20", "h-130", "v-130" ] ],
+    [ "keypad:C3", "esp:16", "magenta", [ "v30", "h-120", "v-130" ] ],
+    [ "keypad:C4", "esp:12", "magenta", [ "v70", "h-370", "v-190" ] ]
   ],
   "dependencies": {}
 }

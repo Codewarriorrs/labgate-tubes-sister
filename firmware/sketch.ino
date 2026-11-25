@@ -11,16 +11,18 @@
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <Keypad.h>
 
 // Konfigurasi WiFi Wokwi
 const char* WIFI_SSID = "Wokwi-GUEST";
 const char* WIFI_PASS = "";
 
-// Konfigurasi MQTT
+// Konfigurasi MQTT & PIN Darurat
 const char* MQTT_SERVER = "broker.hivemq.com";
 const int MQTT_PORT = 1883;
 const char* TOPIC_ROOT = "labgate/lab-01";
 const char* ROOM_CODE = "lab-01";
+const char* EMERGENCY_PIN = "1722";
 
 // Pin Perangkat Keras
 // CATATAN: I2C LCD menggunakan Pin 21 (SDA) dan Pin 22 (SCL).
@@ -37,6 +39,22 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 MFRC522 rfc(SS_PIN, RST_PIN);
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
+
+// Konfigurasi Keypad 4x4 (PIN Darurat Petugas)
+const byte KEYPAD_ROWS = 4;
+const byte KEYPAD_COLS = 4;
+char hexaKeys[KEYPAD_ROWS][KEYPAD_COLS] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
+};
+byte rowPins[KEYPAD_ROWS] = {32, 33, 25, 14};
+byte colPins[KEYPAD_COLS] = {13, 17, 16, 12};
+Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, KEYPAD_ROWS, KEYPAD_COLS);
+
+String pinBuffer = "";
+unsigned long lastKeyPressTime = 0;
 
 // State Machine & Counter
 enum DoorState { STATE_IDLE, STATE_WAITING_RESPONSE, STATE_DOOR_OPEN, STATE_DENIED };
@@ -242,6 +260,88 @@ void checkRfidHardware() {
   }
 }
 
+void grantEmergencyPinAccess() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("AKSES DARURAT");
+  lcd.setCursor(0, 1);
+  lcd.print("Petugas Piket");
+
+  digitalWrite(RELAY_PIN, HIGH);
+  digitalWrite(LED_GREEN, HIGH);
+  digitalWrite(LED_RED, LOW);
+  tone(BUZZER_PIN, 2000, 150);
+  delay(180);
+  tone(BUZZER_PIN, 2500, 150);
+
+  // Kirim catatan ke Gateway jika MQTT aktif (tidak memblokir jika offline)
+  if (mqttClient.connected()) {
+    currentSeq++;
+    StaticJsonDocument<128> doc;
+    doc["seq"] = currentSeq;
+    doc["room"] = ROOM_CODE;
+    doc["method"] = "manual_pin";
+    doc["uid"] = EMERGENCY_PIN;
+    char buffer[128];
+    serializeJson(doc, buffer);
+    String scanTopic = String(TOPIC_ROOT) + "/scan";
+    mqttClient.publish(scanTopic.c_str(), buffer);
+  }
+
+  holdDuration = 5000;
+  currentState = STATE_DOOR_OPEN;
+  stateTimer = millis();
+}
+
+void checkKeypadInput() {
+  char customKey = customKeypad.getKey();
+  if (customKey) {
+    lastKeyPressTime = millis();
+    tone(BUZZER_PIN, 1500, 40);
+
+    if (customKey == '*') {
+      // Reset input PIN
+      pinBuffer = "";
+      setLcdIdle();
+      return;
+    }
+
+    if (customKey == '#') {
+      // Konfirmasi PIN
+      if (pinBuffer.length() > 0) {
+        Serial.println("\n[KEYPAD] PIN dimasukkan: " + pinBuffer);
+        if (pinBuffer == EMERGENCY_PIN) {
+          Serial.println("[KEYPAD] PIN DARURAT BENAR! Pintu dibuka.");
+          pinBuffer = "";
+          grantEmergencyPinAccess();
+        } else {
+          Serial.println("[KEYPAD] PIN SALAH!");
+          pinBuffer = "";
+          denyAccessLocal("PIN Salah");
+        }
+      }
+      return;
+    }
+
+    if (pinBuffer.length() < 8) {
+      pinBuffer += customKey;
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Masukkan PIN:");
+      lcd.setCursor(0, 1);
+      String masked = "";
+      for (int i = 0; i < pinBuffer.length(); i++) masked += "*";
+      lcd.print(masked + " (# Ok)");
+    }
+  }
+
+  // Timeout jika mengetik PIN tidak selesai selama 10 detik
+  if (pinBuffer.length() > 0 && (millis() - lastKeyPressTime > 10000)) {
+    pinBuffer = "";
+    setLcdIdle();
+  }
+}
+
 void checkSerialInputs() {
   // Input Serial Monitor: Ketik UID atau nama mahasiswa langsung di terminal Wokwi
   if (Serial.available() > 0) {
@@ -303,7 +403,8 @@ void setup() {
   Serial.println("  * [g] Green Card  -> UID 11223344 (Malvin)");
   Serial.println("  * [y] Yellow Card -> UID 55667788 (Bintang)");
   Serial.println("  * [r] Red Card    -> UID aabbccdd (Kartu Asing / Ditolak)");
-  Serial.println("Tekan 't' di keyboard pada Wokwi untuk TAP kartu!\n");
+  Serial.println("Tekan 't' di keyboard pada Wokwi untuk TAP kartu!");
+  Serial.println("Keypad 4x4 Darurat: Ketik 1722# (tanpa perlu Gateway)\n");
 }
 
 void loop() {
@@ -327,6 +428,7 @@ void loop() {
 
   switch (currentState) {
     case STATE_IDLE:
+      checkKeypadInput();
       checkSerialInputs();
       checkRfidHardware();
       break;
