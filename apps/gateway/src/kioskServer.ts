@@ -314,8 +314,14 @@ function getKioskHtml(roomCode: string): string {
           <button onclick="testRfid('01020304')" class="flat-btn-primary px-3 py-1.5 text-xs">
             Tap KTM Isya (01020304)
           </button>
-          <button onclick="testRfid('99999999')" class="flat-btn-secondary px-3 py-1.5 text-xs">
-            Tap Kartu Asing (99999999)
+          <button onclick="testRfid('11223344')" class="flat-btn-primary px-3 py-1.5 text-xs">
+            Tap KTM Malvin (11223344)
+          </button>
+          <button onclick="testRfid('55667788')" class="flat-btn-primary px-3 py-1.5 text-xs">
+            Tap KTM Bintang (55667788)
+          </button>
+          <button onclick="testRfid('aabbccdd')" class="flat-btn-secondary px-3 py-1.5 text-xs">
+            Tap Kartu Asing (AABBCCDD)
           </button>
         </div>
         <span class="text-[11px] text-[#4A4A4A]">Mendukung Tap Wokwi (MQTT) & Direct Web</span>

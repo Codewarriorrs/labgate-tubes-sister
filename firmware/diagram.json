@@ -14,59 +14,75 @@
       "type": "wokwi-lcd1602",
       "id": "lcd",
       "top": -190,
-      "left": -30,
+      "left": 0,
       "attrs": { "pins": "i2c" }
+    },
+    {
+      "type": "board-mfrc522",
+      "id": "rfid",
+      "top": -30,
+      "left": -220,
+      "attrs": { "uid": "01:02:03:04" }
+    },
+    {
+      "type": "wokwi-relay-module",
+      "id": "relay",
+      "top": 240,
+      "left": -220,
+      "attrs": {}
     },
     {
       "type": "wokwi-buzzer",
       "id": "buzzer",
-      "top": -170,
-      "left": 360,
+      "top": -160,
+      "left": 380,
       "attrs": { "volume": "0.1" }
     },
     {
       "type": "wokwi-led",
       "id": "led_green",
-      "top": 0,
-      "left": 360,
-      "attrs": { "color": "green" }
+      "top": 10,
+      "left": 380,
+      "attrs": { "color": "green", "label": "Status: Granted" }
     },
     {
       "type": "wokwi-led",
       "id": "led_red",
-      "top": 70,
-      "left": 360,
-      "attrs": { "color": "red" }
-    },
-    {
-      "type": "wokwi-relay-module",
-      "id": "relay",
-      "top": 200,
-      "left": -150,
-      "attrs": {}
+      "top": 90,
+      "left": 380,
+      "attrs": { "color": "red", "label": "Status: Denied" }
     }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
 
-    [ "lcd:GND", "esp:GND.1", "black", [ "h-30", "v380", "h180" ] ],
-    [ "lcd:VCC", "esp:5V", "red", [ "h-40", "v430", "h190" ] ],
-    [ "lcd:SDA", "esp:21", "blue", [ "h-20", "v-60", "h480", "v390", "h-140" ] ],
-    [ "lcd:SCL", "esp:22", "yellow", [ "h-10", "v-80", "h500", "v360", "h-160" ] ],
+    [ "rfid:3.3V", "esp:3V3", "red", [ "h-20", "v40", "h360" ] ],
+    [ "rfid:RST", "esp:27", "orange", [ "h-30", "v130", "h370" ] ],
+    [ "rfid:GND", "esp:GND.1", "black", [ "h-40", "v180", "h380" ] ],
 
-    [ "buzzer:1", "esp:GND.2", "black", [ "v30", "h-80", "v210", "h-30" ] ],
-    [ "buzzer:2", "esp:2", "orange", [ "v50", "h-60", "v350", "h-50" ] ],
+    [ "rfid:SDA", "esp:5", "yellow", [ "h-50", "v-80", "h530", "v310", "h-110" ] ],
+    [ "rfid:SCK", "esp:18", "green", [ "h-60", "v-100", "h560", "v320", "h-130" ] ],
+    [ "rfid:MOSI", "esp:23", "blue", [ "h-70", "v-120", "h590", "v230", "h-150" ] ],
+    [ "rfid:MISO", "esp:19", "purple", [ "h-80", "v-140", "h620", "v280", "h-170" ] ],
 
-    [ "led_green:A", "esp:15", "green", [ "v10", "h-60", "v220", "h-50" ] ],
-    [ "led_green:C", "esp:GND.2", "black", [ "v0", "h-90", "v80", "h-20" ] ],
+    [ "lcd:GND", "esp:GND.1", "black", [ "h-30", "v440", "h150" ] ],
+    [ "lcd:VCC", "esp:5V", "red", [ "h-40", "v480", "h160" ] ],
+    [ "lcd:SDA", "esp:21", "blue", [ "h-20", "v-50", "h480", "v380", "h-130" ] ],
+    [ "lcd:SCL", "esp:22", "yellow", [ "h-10", "v-70", "h500", "v340", "h-150" ] ],
 
-    [ "led_red:A", "esp:4", "red", [ "v10", "h-70", "v130", "h-40" ] ],
-    [ "led_red:C", "esp:GND.2", "black", [ "v0", "h-90", "v10", "h-20" ] ],
+    [ "relay:VCC", "esp:5V", "red", [ "h-20", "v60", "h360" ] ],
+    [ "relay:GND", "esp:GND.1", "black", [ "h-30", "v-20", "h370" ] ],
+    [ "relay:IN", "esp:26", "purple", [ "h-40", "v-70", "h380" ] ],
 
-    [ "relay:VCC", "esp:5V", "red", [ "h60", "v40", "h220" ] ],
-    [ "relay:GND", "esp:GND.1", "black", [ "h50", "v0", "h230" ] ],
-    [ "relay:IN", "esp:26", "purple", [ "h40", "v-40", "h240" ] ]
+    [ "buzzer:1", "esp:GND.2", "black", [ "v20", "h-80", "v180", "h-30" ] ],
+    [ "buzzer:2", "esp:2", "orange", [ "v40", "h60", "v330", "h-160" ] ],
+
+    [ "led_green:C", "esp:GND.2", "black", [ "v0", "h-80", "v50", "h-30" ] ],
+    [ "led_green:A", "esp:15", "green", [ "v10", "h50", "v200", "h-140" ] ],
+
+    [ "led_red:C", "esp:GND.2", "black", [ "v0", "h-80", "v-20", "h-30" ] ],
+    [ "led_red:A", "esp:4", "red", [ "v10", "h40", "v110", "h-120" ] ]
   ],
   "dependencies": {}
 }

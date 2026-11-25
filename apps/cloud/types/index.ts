@@ -18,6 +18,7 @@ export interface Card {
   isActive: boolean;
   createdAt: string;
   userName?: string;
+  userNim?: string | null;
   userRole?: UserRole;
 }
 
@@ -73,6 +74,7 @@ export interface AccessLog {
   id: string;
   eventId: string;
   roomId: string;
+  roomName?: string | null;
   roomCode?: string;
   userId?: string | null;
   userName?: string | null;

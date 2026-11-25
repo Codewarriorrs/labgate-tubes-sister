@@ -8,6 +8,7 @@ node_modules/
 out/
 build/
 dist/
+*.tsbuildinfo
 
 # Environment Variables & Secrets (SANGAT PENTING: Kredensial tidak boleh ter-push)
 .env

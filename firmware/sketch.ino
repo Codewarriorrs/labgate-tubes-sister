@@ -1,6 +1,6 @@
 /*
  * LabGate ESP32 Firmware
- * Hardware: ESP32 + MFRC522 RFID + LCD 16x2 I2C + Relay Kunci + Buzzer/LED
+ * Hardware: ESP32 + MFRC522 RFID + LCD 16x2 I2C + Relay Kunci + Buzzer/LED + Simulasi Tombol Wokwi
  * Protokol: MQTT ke Gateway Lokal (atau HiveMQ untuk simulasi Wokwi)
  */
 
@@ -23,12 +23,14 @@ const char* TOPIC_ROOT = "labgate/lab-01";
 const char* ROOM_CODE = "lab-01";
 
 // Pin Perangkat Keras
-#define SS_PIN    5
-#define RST_PIN   22
-#define RELAY_PIN 26
-#define BUZZER_PIN 2
-#define LED_GREEN 15
-#define LED_RED   4
+// CATATAN: I2C LCD menggunakan Pin 21 (SDA) dan Pin 22 (SCL).
+// RST_PIN MFRC522 HARUS menggunakan Pin 27 (JANGAN gunakan Pin 22 agar tidak merusak bus I2C LCD).
+#define SS_PIN        5
+#define RST_PIN       27
+#define RELAY_PIN     26
+#define BUZZER_PIN    2
+#define LED_GREEN     15
+#define LED_RED       4
 
 // Objek Perangkat Keras
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -48,83 +50,13 @@ unsigned long lastStatusPublish = 0;
 void setLcdIdle() {
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("LabGate - ");
+  lcd.print("LabGate: ");
   lcd.print(ROOM_CODE);
   lcd.setCursor(0, 1);
   lcd.print("Tempelkan Kartu");
   digitalWrite(LED_GREEN, LOW);
   digitalWrite(LED_RED, LOW);
   digitalWrite(RELAY_PIN, LOW); // Solenoid terkunci
-}
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(RELAY_PIN, OUTPUT);
-  pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_RED, OUTPUT);
-
-  digitalWrite(RELAY_PIN, LOW);
-  digitalWrite(BUZZER_PIN, LOW);
-  digitalWrite(LED_GREEN, LOW);
-  digitalWrite(LED_RED, LOW);
-
-  Wire.begin(21, 22);
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0, 0);
-  lcd.print("LabGate Booting");
-  lcd.setCursor(0, 1);
-  lcd.print("Menghubungkan...");
-
-  SPI.begin();
-  rfc.PCD_Init();
-
-  setupWiFi();
-  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-  mqttClient.setCallback(mqttCallback);
-
-  setLcdIdle();
-}
-
-void setupWiFi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
-  Serial.print("Menghubungkan ke WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(300);
-    Serial.print(".");
-  }
-  Serial.println("\nWiFi Terhubung! IP: " + WiFi.localIP().toString());
-}
-
-void reconnectMqtt() {
-  while (!mqttClient.connected()) {
-    String clientId = "ESP32Gate-" + String(ROOM_CODE) + "-" + String(random(1000, 9999));
-    Serial.print("Mencoba koneksi MQTT ke " + String(MQTT_SERVER) + "...");
-    if (mqttClient.connect(clientId.c_str())) {
-      Serial.println("Berhasil!");
-      String cmdTopic = String(TOPIC_ROOT) + "/cmd";
-      mqttClient.subscribe(cmdTopic.c_str());
-      publishStatus("online");
-    } else {
-      Serial.print("Gagal, rc=");
-      Serial.print(mqttClient.state());
-      Serial.println(" coba lagi dlm 2 detik");
-      delay(2000);
-    }
-  }
-}
-
-void publishStatus(const char* statusStr) {
-  StaticJsonDocument<128> doc;
-  doc["room"] = ROOM_CODE;
-  doc["status"] = statusStr;
-  doc["uptime"] = millis() / 1000;
-  char buffer[128];
-  serializeJson(doc, buffer);
-  String statusTopic = String(TOPIC_ROOT) + "/status";
-  mqttClient.publish(statusTopic.c_str(), buffer);
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
@@ -144,8 +76,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   unsigned long msgSeq = doc["seq"] | 0;
   const char* action = doc["action"] | "";
 
-  // Kontrak: Balasan normal mencocokkan currentSeq saat menunggu respon.
-  // Kontrak Tambahan Remote Unlock: Memperbolehkan seq == 0 saat state IDLE
+  // Balasan mencocokkan currentSeq saat menunggu respon, atau remote unlock darurat (seq == 0)
   bool isMatchingSeq = (currentState == STATE_WAITING_RESPONSE && msgSeq == currentSeq);
   bool isRemoteUnlock = (currentState == STATE_IDLE && msgSeq == 0 && strcmp(action, "open") == 0);
 
@@ -198,20 +129,50 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   }
 }
 
-void checkRfid() {
-  if (!rfc.PICC_IsNewCardPresent()) return;
-  if (!rfc.PICC_ReadCardSerial()) return;
+void publishStatus(const char* statusStr) {
+  StaticJsonDocument<128> doc;
+  doc["room"] = ROOM_CODE;
+  doc["status"] = statusStr;
+  doc["uptime"] = millis() / 1000;
+  char buffer[128];
+  serializeJson(doc, buffer);
+  String statusTopic = String(TOPIC_ROOT) + "/status";
+  mqttClient.publish(statusTopic.c_str(), buffer);
+}
 
-  // Baca UID kartu sebagai hex string (contoh: 01020304)
-  String uidStr = "";
-  for (byte i = 0; i < rfc.uid.size; i++) {
-    if (rfc.uid.uidByte[i] < 0x10) uidStr += "0";
-    uidStr += String(rfc.uid.uidByte[i], HEX);
+void reconnectMqtt() {
+  while (!mqttClient.connected()) {
+    String clientId = "ESP32Gate-" + String(ROOM_CODE) + "-" + String(random(1000, 9999));
+    Serial.print("Mencoba koneksi MQTT ke " + String(MQTT_SERVER) + "...");
+    if (mqttClient.connect(clientId.c_str())) {
+      Serial.println("Berhasil!");
+      String cmdTopic = String(TOPIC_ROOT) + "/cmd";
+      mqttClient.subscribe(cmdTopic.c_str());
+      publishStatus("online");
+      setLcdIdle(); // Perbarui LCD seketika setelah MQTT terhubung
+    } else {
+      Serial.print("Gagal, rc=");
+      Serial.print(mqttClient.state());
+      Serial.println(" coba lagi dlm 2 detik");
+      delay(2000);
+    }
   }
-  uidStr.toLowerCase();
-  rfc.PICC_HaltA();
+}
 
-  Serial.println("Kartu Terdeteksi UID: " + uidStr);
+void setupWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  Serial.print("Menghubungkan ke WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(300);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi Terhubung! IP: " + WiFi.localIP().toString());
+}
+
+void triggerRfidScan(String uidStr) {
+  uidStr.toLowerCase();
+  Serial.println("\n[SCAN RFID] Memproses UID: " + uidStr);
 
   currentSeq++;
   StaticJsonDocument<128> doc;
@@ -229,10 +190,90 @@ void checkRfid() {
   lcd.setCursor(0, 0);
   lcd.print("Memverifikasi...");
   lcd.setCursor(0, 1);
-  lcd.print("Tunggu Sebentar");
+  lcd.print("UID: " + uidStr);
 
   currentState = STATE_WAITING_RESPONSE;
   stateTimer = millis();
+}
+
+void checkRfidHardware() {
+  // Pembacaan fisik MFRC522 (untuk board fisik nyata & komponen Wokwi board-mfrc522)
+  if (rfc.PICC_IsNewCardPresent() && rfc.PICC_ReadCardSerial()) {
+    String uidStr = "";
+    for (byte i = 0; i < rfc.uid.size; i++) {
+      if (rfc.uid.uidByte[i] < 0x10) uidStr += "0";
+      uidStr += String(rfc.uid.uidByte[i], HEX);
+    }
+    uidStr.toLowerCase();
+    rfc.PICC_HaltA();
+    rfc.PCD_StopCrypto1();
+    Serial.println("[WOKWI RFID] Kartu Terdeteksi di Reader: " + uidStr);
+    triggerRfidScan(uidStr);
+  }
+}
+
+void checkSerialInputs() {
+  // Input Serial Monitor: Ketik UID atau nama mahasiswa langsung di terminal Wokwi
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+    if (input.length() > 0) {
+      if (input == "isya" || input == "tap" || input == "ktm") {
+        triggerRfidScan("01020304");
+      } else if (input == "malvin") {
+        triggerRfidScan("11223344");
+      } else if (input == "bintang") {
+        triggerRfidScan("55667788");
+      } else {
+        triggerRfidScan(input);
+      }
+    }
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Inisialisasi Pin Output
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+
+  digitalWrite(RELAY_PIN, LOW);
+  digitalWrite(BUZZER_PIN, LOW);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_RED, LOW);
+
+  // Inisialisasi Bus I2C LCD (Pin 21 SDA, Pin 22 SCL)
+  Wire.begin(21, 22);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("LabGate Booting");
+  lcd.setCursor(0, 1);
+  lcd.print("Menghubungkan...");
+
+  // Inisialisasi SPI RFID (RST menggunakan pin 27, BUKAN 22)
+  SPI.begin();
+  rfc.PCD_Init();
+
+  setupWiFi();
+  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
+  mqttClient.setCallback(mqttCallback);
+
+  reconnectMqtt();
+  setLcdIdle();
+
+  Serial.println("\n================================================");
+  Serial.println("       LABGATE RFID DOOR ACCESS READY           ");
+  Serial.println("================================================");
+  Serial.println("Pilihan Kartu Fisik Wokwi (board-mfrc522):");
+  Serial.println("  * [b] Blue Card   -> UID 01020304 (Isya - 21120124130051)");
+  Serial.println("  * [g] Green Card  -> UID 11223344 (Malvin)");
+  Serial.println("  * [y] Yellow Card -> UID 55667788 (Bintang)");
+  Serial.println("  * [r] Red Card    -> UID aabbccdd (Kartu Asing / Ditolak)");
+  Serial.println("Tekan 't' di keyboard pada Wokwi untuk TAP kartu!\n");
 }
 
 void loop() {
@@ -240,7 +281,7 @@ void loop() {
   if (!mqttClient.connected()) reconnectMqtt();
   mqttClient.loop();
 
-  // Kirim status heartbeat berkala ke MQTT tiap 30 detik
+  // Heartbeat berkala tiap 30 detik
   if (millis() - lastStatusPublish > 30000) {
     publishStatus("online");
     lastStatusPublish = millis();
@@ -250,7 +291,8 @@ void loop() {
 
   switch (currentState) {
     case STATE_IDLE:
-      checkRfid();
+      checkSerialInputs();
+      checkRfidHardware();
       break;
 
     case STATE_WAITING_RESPONSE:

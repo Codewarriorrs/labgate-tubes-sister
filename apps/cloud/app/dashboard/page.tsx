@@ -279,19 +279,26 @@ export default function DashboardPage() {
 
       {/* Section Atas (2-Column Grid: 65% Form Pengajuan, 35% Ketersediaan Ruangan) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Card Kiri (Formulir Peminjaman Baru) - 65% Lebar */}
-        <div className="lg:col-span-8 bg-white border border-slate-200/80 shadow-xs rounded-xl p-6 space-y-5">
-          <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3.5">
-            <CalendarPlus className="w-5 h-5 text-blue-600" />
-            <h2 className="text-base font-semibold text-slate-900">
-              Formulir Peminjaman Baru
-            </h2>
+        {/* Card Kiri (Formulir Peminjaman Baru) - DentCare Rounded-3xl Card */}
+        <div className="lg:col-span-8 bg-white border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)] rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#2A85FF] flex items-center justify-center">
+              <CalendarPlus className="w-5 h-5 text-[#2A85FF]" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Formulir Peminjaman Baru
+              </h2>
+              <p className="text-xs text-slate-500">
+                Lengkapi formulir untuk mengajukan izin pemakaian laboratorium.
+              </p>
+            </div>
           </div>
 
-          <form onSubmit={handleCreateBooking} className="space-y-4">
-            {/* Dropdown Ruang Laboratorium Cukup Lebar */}
+          <form onSubmit={handleCreateBooking} className="space-y-5">
+            {/* Dropdown Ruang Laboratorium */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
                 Ruang Laboratorium
               </label>
               <select
@@ -300,7 +307,7 @@ export default function DashboardPage() {
                   setSelectedRoomId(e.target.value);
                   setSelectedEquipmentIds([]);
                 }}
-                className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white text-slate-900 transition"
+                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[#2A85FF] bg-white text-slate-900 transition"
                 required
               >
                 {rooms.map((r) => (
@@ -312,17 +319,17 @@ export default function DashboardPage() {
             </div>
 
             {/* Banner Informasi Slot Jam Terisi pada Ruangan Terpilih */}
-            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-lg text-xs space-y-1.5">
-              <div className="flex items-center space-x-1.5 text-slate-700 font-semibold">
-                <Clock className="w-3.5 h-3.5 text-blue-600" />
+            <div className="p-4 bg-[#F8FAFC] border border-slate-200/70 rounded-2xl text-xs space-y-2">
+              <div className="flex items-center space-x-2 text-slate-800 font-bold">
+                <Clock className="w-4 h-4 text-[#2A85FF]" />
                 <span>Jadwal Terisi pada {currentRoom?.name || 'Ruangan'}:</span>
               </div>
               {occupiedSlotsForSelectedRoom.length === 0 ? (
-                <p className="text-emerald-700 font-medium">
+                <p className="text-emerald-700 font-medium pl-6">
                   Belum ada peminjaman aktif &bull; Semua slot jam 06.00 – 19.00 WIB tersedia.
                 </p>
               ) : (
-                <div className="flex flex-wrap gap-1.5 pt-1">
+                <div className="flex flex-wrap gap-2 pt-1 pl-6">
                   {occupiedSlotsForSelectedRoom.map((slot) => {
                     const s = new Date(slot.startTime).toLocaleTimeString('id-ID', {
                       hour: '2-digit',
@@ -339,9 +346,9 @@ export default function DashboardPage() {
                     return (
                       <span
                         key={slot.id}
-                        className="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-[11px] font-mono"
+                        className="bg-white border border-slate-200 text-slate-800 font-semibold text-xs px-2.5 py-1 rounded-md shadow-2xs"
                       >
-                        {day}: {s}–{e} WIB ({slot.userName.split(' ')[0]})
+                        {day}: {s} - {e} WIB ({slot.userName ? slot.userName.split(' ')[0] : 'Peminjam'})
                       </span>
                     );
                   })}
@@ -352,7 +359,7 @@ export default function DashboardPage() {
             {/* Input Waktu Mulai & Selesai (Restriksi Masa Lalu & Jam Kerja) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
                   Waktu Mulai Akses (Min. 06.00 WIB)
                 </label>
                 <input
@@ -360,13 +367,13 @@ export default function DashboardPage() {
                   min={minDateTime}
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white text-slate-900 transition"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[#2A85FF] bg-white text-slate-900 transition"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
                   Waktu Selesai Akses (Maks. 19.00 WIB)
                 </label>
                 <input
@@ -374,7 +381,7 @@ export default function DashboardPage() {
                   min={startTime || minDateTime}
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white text-slate-900 transition"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[#2A85FF] bg-white text-slate-900 transition"
                   required
                 />
               </div>
@@ -382,8 +389,8 @@ export default function DashboardPage() {
 
             {/* Multi-Select Chips/Tags untuk Alat Lab Tambahan */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Alat Lab Tambahan (Pilih satu atau beberapa)
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Alat Lab Tambahan (Multi-Select)
               </label>
               {availableEquipments.length === 0 ? (
                 <p className="text-xs text-slate-400 italic">
@@ -398,15 +405,15 @@ export default function DashboardPage() {
                         type="button"
                         key={eq.id}
                         onClick={() => toggleEquipmentChip(eq.id)}
-                        className={`inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
+                        className={`inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
                           isSelected
-                            ? 'bg-blue-50 border-blue-600 text-blue-700 shadow-xs'
+                            ? 'bg-[#2A85FF] border-[#2A85FF] text-white shadow-xs'
                             : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                       >
-                        <Cpu className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`} />
+                        <Cpu className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
                         <span>{eq.name}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
                       </button>
                     );
                   })}
@@ -416,7 +423,7 @@ export default function DashboardPage() {
 
             {/* Keperluan Penggunaan */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
                 Keperluan Penggunaan & Riset
               </label>
               <textarea
@@ -424,17 +431,17 @@ export default function DashboardPage() {
                 onChange={(e) => setPurpose(e.target.value)}
                 placeholder="Jelaskan tujuan peminjaman laboratorium, praktikum, atau penelitian..."
                 rows={3}
-                className="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white text-slate-900 transition"
+                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-[#2A85FF] bg-white text-slate-900 transition"
                 required
               />
             </div>
 
-            {/* Tombol Utama: Biru Gradasi Ungu */}
+            {/* Tombol Utama: DentCare Solid Obsidian Black Pill Button */}
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn-primary w-full sm:w-auto"
+                className="btn-pill-primary w-full sm:w-auto px-8 py-3 text-sm"
               >
                 {submitting ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Booking'}
               </button>
@@ -442,20 +449,24 @@ export default function DashboardPage() {
           </form>
         </div>
 
-        {/* Card Kanan (Ketersediaan Ruangan) - 35% Lebar & Interaktif Clickable */}
-        <div className="lg:col-span-4 bg-white border border-slate-200/80 shadow-xs rounded-xl p-5 space-y-4">
-          <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
-            <DoorOpen className="w-5 h-5 text-slate-700" />
-            <h2 className="text-base font-semibold text-slate-900">
-              Ketersediaan Ruangan
-            </h2>
+        {/* Card Kanan (Ketersediaan Ruangan) - DentCare Style */}
+        <div className="lg:col-span-4 bg-white border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)] rounded-3xl p-6 space-y-4">
+          <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3.5">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+              <DoorOpen className="w-4 h-4 text-slate-700" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">
+                Ketersediaan Ruangan
+              </h2>
+            </div>
           </div>
 
           <p className="text-xs text-slate-500">
             Klik kartu ruangan di bawah untuk memilihnya langsung pada formulir:
           </p>
 
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {rooms.map((r) => {
               const isOnline = (r as any).isOnline;
               const isSelected = selectedRoomId === r.id;
@@ -467,37 +478,37 @@ export default function DashboardPage() {
                     setSelectedRoomId(r.id);
                     setSelectedEquipmentIds([]);
                   }}
-                  className={`p-3.5 rounded-xl border cursor-pointer transition ${
+                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'border-blue-500 ring-2 ring-blue-100 bg-blue-50/20 shadow-xs'
-                      : 'border-slate-200 hover:border-slate-300 bg-white'
+                      ? 'border-[#2A85FF] ring-2 ring-blue-100 bg-blue-50/20 shadow-xs'
+                      : 'border-slate-100 hover:border-slate-200 bg-white hover:bg-slate-50/50'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-semibold text-sm text-slate-900">{r.code}</span>
-                    {/* Modern Status Badge with Dot Indicator */}
+                    <span className="font-extrabold text-sm text-slate-900">{r.code}</span>
+                    {/* Status Badge with Dot Indicator */}
                     {isOnline ? (
-                      <span className="inline-flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-xs font-medium">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span className="inline-flex items-center space-x-1.5 bg-[#E8FAF0] text-[#10B981] px-2 py-0.5 rounded-md text-xs font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
                         <span>Tersedia</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium">
+                      <span className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-xs font-semibold">
                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                        <span>Offline / Tutup</span>
+                        <span>Offline</span>
                       </span>
                     )}
                   </div>
 
-                  {/* Nama Lengkap Ruangan (Maks 2 Baris Tanpa Terpotong) */}
-                  <h3 className="text-sm font-medium text-slate-800 line-clamp-2 leading-snug">
+                  {/* Nama Lengkap Ruangan */}
+                  <h3 className="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2 leading-snug">
                     {r.name}
                   </h3>
 
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
+                  <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-slate-100 text-xs text-slate-500">
                     <span>Kapasitas: {r.capacity} praktikan</span>
                     {isSelected && (
-                      <span className="text-blue-600 font-semibold text-[11px]">Terpilih</span>
+                      <span className="text-[#2A85FF] font-bold text-xs">Terpilih</span>
                     )}
                   </div>
                 </div>
@@ -507,23 +518,23 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Section Bawah: Riwayat Permohonan Peminjaman (Accordion / Dropdown) */}
-      <div className="bg-white border border-slate-200/80 shadow-xs rounded-xl overflow-hidden">
+      {/* Section Bawah: Riwayat Permohonan Peminjaman (DentCare Booking Cards) */}
+      <div className="bg-white border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)] rounded-3xl overflow-hidden">
         {/* Accordion Header */}
         <button
           type="button"
           onClick={() => setHistoryAccordionOpen(!historyAccordionOpen)}
-          className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-slate-50/80 transition text-left"
+          className="w-full px-6 sm:px-8 py-5 flex items-center justify-between bg-white hover:bg-slate-50/80 transition text-left"
         >
           <div className="flex items-center space-x-3">
-            <h2 className="text-base font-semibold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Riwayat Permohonan Peminjaman
             </h2>
-            <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+            <span className="bg-blue-50 text-[#2A85FF] font-bold text-xs px-2.5 py-0.5 rounded-md">
               {bookings.length}
             </span>
           </div>
-          <div className="flex items-center space-x-2 text-slate-500 text-xs">
+          <div className="flex items-center space-x-2 text-slate-500 text-xs font-semibold">
             <span>{historyAccordionOpen ? 'Sembunyikan' : 'Buka Riwayat'}</span>
             {historyAccordionOpen ? (
               <ChevronUp className="w-4 h-4" />
@@ -534,236 +545,128 @@ export default function DashboardPage() {
         </button>
 
         {historyAccordionOpen && (
-          <div className="border-t border-slate-100">
+          <div className="p-6 space-y-4">
             {loading && bookings.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-sm">
+              <div className="p-12 text-center text-slate-400 text-sm">
                 Memuat data riwayat peminjaman...
               </div>
             ) : bookings.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-sm">
+              <div className="p-12 text-center text-slate-400 text-sm">
                 Belum ada permohonan booking yang diajukan.
               </div>
             ) : (
-              <>
-                {/* Desktop View: Table dengan Proporsi Kolom yang Seimbang */}
-                <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full text-left table-fixed">
-                    <colgroup>
-                      <col className="w-[20%]" />
-                      <col className="w-[30%]" />
-                      <col className="w-[16%]" />
-                      <col className="w-[18%]" />
-                      <col className="w-[8%]" />
-                      <col className="w-[8%]" />
-                    </colgroup>
-                    <thead className="bg-slate-50 border-b border-slate-200/80 text-xs font-medium text-slate-500 uppercase tracking-wider">
-                      <tr>
-                        <th className="px-5 py-3">Peminjam</th>
-                        <th className="px-5 py-3">Ruangan & Alat</th>
-                        <th className="px-5 py-3">Jadwal</th>
-                        <th className="px-5 py-3">Keperluan</th>
-                        <th className="px-5 py-3 text-center">Status</th>
-                        <th className="px-5 py-3 text-right">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
-                      {bookings.map((b) => {
-                        const dateStr = new Date(b.startTime).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        });
-                        const sTime = new Date(b.startTime).toLocaleTimeString('id-ID', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        });
-                        const eTime = new Date(b.endTime).toLocaleTimeString('id-ID', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        });
+              <div className="space-y-3.5">
+                {bookings.map((b) => {
+                  const startDate = new Date(b.startTime);
+                  const dayNum = startDate.getDate();
+                  const monthName = startDate.toLocaleDateString('id-ID', { month: 'short' });
+                  const dateStr = startDate.toLocaleDateString('id-ID', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  });
+                  const sTime = startDate.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
+                  const eTime = new Date(b.endTime).toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  });
 
-                        return (
-                          <tr key={b.id} className="hover:bg-slate-50/70 transition">
-                            {/* Kolom 1: Peminjam (Hierarki Dibalik: Nama Bold, ID Mono di bawah) */}
-                            <td className="px-5 py-3.5">
-                              <span className="font-semibold text-slate-900 block leading-tight">
-                                {b.userName}
-                              </span>
-                              <span className="text-xs font-mono text-slate-400 mt-0.5 block">
-                                {b.id}
-                              </span>
-                            </td>
+                  return (
+                    <div
+                      key={b.id}
+                      className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-4 sm:p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    >
+                      {/* Left: Date Square Badge + Info */}
+                      <div className="flex items-start sm:items-center space-x-4">
+                        {/* DentCare Signature Date Block */}
+                        <div
+                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex flex-col items-center justify-center font-bold text-center shrink-0 shadow-xs ${
+                            b.status === 'disetujui'
+                              ? 'bg-[#2A85FF] text-white shadow-blue-500/20'
+                              : b.status === 'menunggu'
+                              ? 'bg-amber-500 text-white shadow-amber-500/20'
+                              : 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          <span className="text-xl sm:text-2xl font-bold leading-none">{dayNum}</span>
+                          <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold mt-0.5">
+                            {monthName}
+                          </span>
+                        </div>
 
-                            {/* Kolom 2: Ruangan & Alat (Compact Chip/Tag) */}
-                            <td className="px-5 py-3.5">
-                              <span className="font-medium text-slate-800 block line-clamp-1">
-                                {b.roomName || b.roomId}
-                              </span>
-                              {b.equipmentName && (
-                                <div className="mt-1 flex flex-wrap gap-1">
-                                  {b.equipmentName.split(',').map((eq, i) => (
-                                    <span
-                                      key={i}
-                                      className="inline-flex items-center bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md font-medium"
-                                    >
-                                      <Cpu className="w-3 h-3 mr-1" />
-                                      {eq.trim()}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </td>
-
-                            {/* Kolom 3: Jadwal (2 Baris Ringkas) */}
-                            <td className="px-5 py-3.5 text-xs text-slate-600">
-                              <span className="font-medium text-slate-900 block">{dateStr}</span>
-                              <span className="text-slate-500 block">{sTime} – {eTime} WIB</span>
-                            </td>
-
-                            {/* Kolom 4: Keperluan (line-clamp-2) */}
-                            <td className="px-5 py-3.5 text-xs text-slate-600">
-                              <p className="line-clamp-2" title={b.purpose}>
-                                {b.purpose}
-                              </p>
-                              {b.status === 'ditolak' && b.rejectionReason && (
-                                <p className="text-rose-600 text-[11px] mt-0.5 truncate" title={b.rejectionReason}>
-                                  Alasan: {b.rejectionReason}
-                                </p>
-                              )}
-                            </td>
-
-                            {/* Kolom 5: Status (Soft Pill Badge) */}
-                            <td className="px-5 py-3.5 text-center">
-                              {b.status === 'disetujui' && (
-                                <span className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                                  Disetujui
-                                </span>
-                              )}
-                              {b.status === 'menunggu' && (
-                                <span className="inline-block bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                                  Menunggu
-                                </span>
-                              )}
-                              {b.status === 'ditolak' && (
-                                <span className="inline-block bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                                  Ditolak
-                                </span>
-                              )}
-                            </td>
-
-                            {/* Kolom 6: Aksi (Compact Gradient QR Button & Hover Icons) */}
-                            <td className="px-5 py-3.5 text-right whitespace-nowrap space-x-1.5">
-                              {b.status === 'disetujui' && (
-                                <button
-                                  onClick={() => setActiveQrBooking(b)}
-                                  className="btn-accent px-3 py-1.5 text-xs font-medium rounded-lg"
-                                >
-                                  <QrCode className="w-3.5 h-3.5 mr-1" />
-                                  Tiket QR
-                                </button>
-                              )}
-
-                              {b.status === 'menunggu' && (
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      setEditingBooking(b);
-                                      setEditPurpose(b.purpose);
-                                      setEditStart(b.startTime.substring(0, 16));
-                                      setEditEnd(b.endTime.substring(0, 16));
-                                    }}
-                                    className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition"
-                                    title="Ubah Jadwal"
-                                  >
-                                    <Edit2 className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleCancelBooking(b.id)}
-                                    className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                                    title="Batalkan Booking"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile View: Cards Mandiri (Zero Horizontal Scroll) */}
-                <div className="md:hidden divide-y divide-slate-100">
-                  {bookings.map((b) => {
-                    const dateStr = new Date(b.startTime).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    });
-                    const sTime = new Date(b.startTime).toLocaleTimeString('id-ID', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    });
-                    const eTime = new Date(b.endTime).toLocaleTimeString('id-ID', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    });
-
-                    return (
-                      <div key={b.id} className="p-4 space-y-2.5 text-sm">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className="font-semibold text-slate-900 block leading-tight">
-                              {b.userName}
-                            </span>
-                            <span className="text-xs font-mono text-slate-400">{b.id}</span>
+                        {/* Booking Details */}
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2 text-xs text-slate-500">
+                            <span className="font-semibold text-slate-700">{sTime} - {eTime} WIB</span>
+                            <span>&bull;</span>
+                            <span className="font-mono text-slate-400">#{b.id}</span>
                           </div>
+
+                          <h4 className="text-base font-bold text-slate-900 leading-snug">
+                            {b.roomName || b.roomId}
+                          </h4>
+
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                            <span>
+                              Peminjam: <strong className="text-slate-800">{b.userName}</strong>
+                            </span>
+                            {b.equipmentName && (
+                              <span className="inline-flex items-center bg-blue-50 text-[#2A85FF] text-[11px] px-2 py-0.5 rounded-md font-medium">
+                                <Cpu className="w-3 h-3 mr-1" />
+                                {b.equipmentName}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-slate-500 line-clamp-1 pt-0.5">
+                            <span className="text-slate-400">Keperluan:</span> {b.purpose}
+                          </p>
+
+                          {b.status === 'ditolak' && b.rejectionReason && (
+                            <p className="text-xs text-rose-600 font-medium">
+                              Alasan ditolak: {b.rejectionReason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Status Pill & Action Buttons */}
+                      <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                        {/* Status Tag */}
+                        <div>
                           {b.status === 'disetujui' && (
-                            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
                               Disetujui
                             </span>
                           )}
                           {b.status === 'menunggu' && (
-                            <span className="bg-amber-50 text-amber-700 border border-amber-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
                               Menunggu
                             </span>
                           )}
                           {b.status === 'ditolak' && (
-                            <span className="bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
                               Ditolak
                             </span>
                           )}
                         </div>
 
-                        <div className="space-y-1 text-xs text-slate-600">
-                          <div className="font-medium text-slate-800">
-                            {b.roomName || b.roomId}
-                          </div>
-                          {b.equipmentName && (
-                            <span className="inline-flex items-center bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium">
-                              Alat: {b.equipmentName}
-                            </span>
-                          )}
-                          <div className="text-slate-500">
-                            {dateStr} &bull; {sTime} – {eTime} WIB
-                          </div>
-                          <p className="text-slate-700 pt-0.5">
-                            <strong>Keperluan:</strong> {b.purpose}
-                          </p>
-                        </div>
-
-                        <div className="pt-2 border-t border-slate-100 flex items-center justify-end space-x-2">
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2">
                           {b.status === 'disetujui' && (
                             <button
                               onClick={() => setActiveQrBooking(b)}
-                              className="btn-accent px-3 py-1.5 text-xs font-medium"
+                              className="btn-pill-primary px-4 sm:px-5 py-2 text-xs font-semibold flex items-center shadow-sm"
                             >
-                              <QrCode className="w-3.5 h-3.5 mr-1" />
+                              <QrCode className="w-3.5 h-3.5 mr-1.5" />
                               Tiket QR
                             </button>
                           )}
+
                           {b.status === 'menunggu' && (
                             <>
                               <button
@@ -773,13 +676,13 @@ export default function DashboardPage() {
                                   setEditStart(b.startTime.substring(0, 16));
                                   setEditEnd(b.endTime.substring(0, 16));
                                 }}
-                                className="btn-secondary px-3 py-1.5 text-xs"
+                                className="btn-pill-secondary px-3.5 sm:px-4 py-2 text-xs font-semibold"
                               >
                                 Ubah
                               </button>
                               <button
                                 onClick={() => handleCancelBooking(b.id)}
-                                className="text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-200 text-xs"
+                                className="btn-pill-danger px-3.5 sm:px-4 py-2 text-xs font-semibold"
                               >
                                 Batal
                               </button>
@@ -787,10 +690,10 @@ export default function DashboardPage() {
                           )}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}
@@ -808,59 +711,62 @@ export default function DashboardPage() {
 
       {/* Modal Edit Permohonan Booking */}
       {editingBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="bg-white border border-slate-200 rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
-            <h3 className="font-semibold text-base text-slate-900 pb-2 border-b border-slate-100">
-              Ubah Permohonan Booking ({editingBooking.id})
-            </h3>
-            <form onSubmit={handleEditSubmit} className="space-y-3.5 text-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-100 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+            <div className="pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-lg text-slate-900">
+                Ubah Permohonan Booking
+              </h3>
+              <p className="text-xs text-slate-400 font-mono mt-0.5">#{editingBooking.id}</p>
+            </div>
+            <form onSubmit={handleEditSubmit} className="space-y-4 text-sm">
               <div>
-                <label className="block font-medium text-slate-700 mb-1 text-xs">Waktu Mulai Baru</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Waktu Mulai Baru</label>
                 <input
                   type="datetime-local"
                   min={minDateTime}
                   value={editStart}
                   onChange={(e) => setEditStart(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 transition"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1 text-xs">Waktu Selesai Baru</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Waktu Selesai Baru</label>
                 <input
                   type="datetime-local"
                   min={editStart || minDateTime}
                   value={editEnd}
                   onChange={(e) => setEditEnd(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 transition"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1 text-xs">Keperluan Penggunaan</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Keperluan Penggunaan</label>
                 <textarea
                   value={editPurpose}
                   onChange={(e) => setEditPurpose(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 transition"
                   required
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end space-x-2.5 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setEditingBooking(null)}
-                  className="btn-secondary px-4 py-2 text-xs"
+                  className="btn-pill-secondary px-5 py-2 text-xs font-semibold"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary px-4 py-2 text-xs"
+                  className="btn-pill-primary px-6 py-2 text-xs font-semibold shadow-sm"
                 >
                   {submitting ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </button>

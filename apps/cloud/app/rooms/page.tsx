@@ -110,19 +110,19 @@ export default function RoomsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header: Direct Typography, no nested boxes, no pill badges */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E5E7EB] pb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Manajemen Ruangan & Perangkat Gateway
           </h1>
-          <p className="text-xs text-[#4A4A4A] mt-1">
-            Konfigurasi ruangan, kunci API gateway, status online gate, dan buka pintu jarak jauh (Hak Akses Kepala TU / Admin)
+          <p className="text-sm text-slate-500 mt-1">
+            Konfigurasi ruangan, kunci API gateway, status gate fisik, dan kendali buka jarak jauh
           </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-primary self-start sm:self-auto"
+          className="btn-pill-primary self-start sm:self-auto px-6 py-2.5 text-xs font-semibold flex items-center shadow-sm"
         >
           <Plus className="w-4 h-4 mr-1.5" />
           Tambah Ruangan
@@ -131,16 +131,16 @@ export default function RoomsPage() {
 
       {feedback && (
         <div
-          className={`p-3 rounded-[4px] text-xs font-semibold flex items-start space-x-2 border ${
+          className={`p-4 rounded-2xl text-sm font-medium flex items-start space-x-3 border ${
             feedback.type === 'success'
-              ? 'bg-[#DCFCE7] text-[#15803D] border-[#86EFAC]'
-              : 'bg-[#FEE2E2] text-[#DC2626] border-[#FCA5A5]'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border-rose-200'
           }`}
         >
           {feedback.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" />
           ) : (
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
           )}
           <span>{feedback.message}</span>
         </div>
@@ -149,7 +149,7 @@ export default function RoomsPage() {
       {/* Grid Ruangan */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full p-8 text-center text-[#4A4A4A] text-xs font-semibold">
+          <div className="col-span-full p-12 text-center text-slate-400 text-sm bg-white rounded-3xl border border-slate-100">
             Memuat data ruangan...
           </div>
         ) : rooms.map((room) => {
@@ -164,54 +164,63 @@ export default function RoomsPage() {
           return (
             <div
               key={room.id}
-              className="bg-white rounded-[4px] p-5 border border-[#E5E7EB] flex flex-col justify-between hover:border-[#1A1A1A] transition"
+              className="bg-white rounded-3xl p-6 border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-lg transition flex flex-col justify-between space-y-5"
             >
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="font-bold text-[#1A1A1A] text-base block">
+                    <h3 className="font-bold text-slate-900 text-base leading-snug">
                       {room.name}
-                    </span>
-                    <span className="font-mono text-xs text-[#0066FF] font-semibold mt-0.5 block">
+                    </h3>
+                    <span className="font-mono text-xs text-[#2A85FF] font-semibold mt-0.5 block">
                       Kode: {room.code}
                     </span>
                   </div>
 
-                  <span
-                    className={`font-mono text-[10px] font-bold uppercase ${
-                      isOnline ? 'text-[#16A34A]' : 'text-[#4A4A4A]'
-                    }`}
-                  >
-                    [{isOnline ? 'ONLINE' : 'OFFLINE'}]
-                  </span>
+                  {isOnline ? (
+                    <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+                      Online
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center bg-slate-100 text-slate-500 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                      <span className="w-2 h-2 rounded-full bg-slate-400 mr-1.5" />
+                      Offline
+                    </span>
+                  )}
                 </div>
 
-                <p className="text-xs text-[#4A4A4A] leading-relaxed">
+                <p className="text-xs text-slate-500 leading-relaxed">
                   {room.description || 'Tidak ada deskripsi'}
                 </p>
 
-                <div className="bg-[#F8F9FA] rounded-[2px] p-3 text-[11px] text-[#1A1A1A] space-y-1.5 border border-[#E5E7EB]">
-                  <div className="flex justify-between">
-                    <span className="text-[#4A4A4A]">Detak Terakhir:</span>
-                    <span className="font-mono">{lastSeenStr}</span>
+                {/* Status Box: DentCare Soft Sky-Blue Tint */}
+                <div className="bg-[#EAF4FF] rounded-2xl p-4 text-xs text-slate-700 space-y-2 border border-blue-100/60">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Kapasitas:</span>
+                    <span className="font-semibold text-slate-900">{room.capacity || 30} Praktikan</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4A4A4A]">Sinkron Terakhir:</span>
-                    <span className="font-mono">{lastSyncStr}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Detak Gateway:</span>
+                    <span className="font-mono text-slate-800">{lastSeenStr}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4A4A4A]">Antrean Log:</span>
-                    <span className="font-semibold text-[#0066FF]">{room.queueCount || 0} event</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Sinkron Terakhir:</span>
+                    <span className="font-mono text-slate-800">{lastSyncStr}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Antrean Log:</span>
+                    <span className="font-semibold text-[#2A85FF]">{room.queueCount || 0} event</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-[#E5E7EB] flex items-center justify-between">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
                 <button
                   onClick={() => handleRemoteUnlock(room.id, room.name)}
                   disabled={unlockLoadingId === room.id}
-                  className="btn-primary py-1.5 px-3 text-xs flex items-center space-x-1.5 disabled:opacity-50"
-                  title="Kirim perintah buka relay solenoid ke gateway"
+                  className="flex-1 btn-pill-primary py-2.5 px-4 text-xs font-semibold flex items-center justify-center space-x-1.5 shadow-sm disabled:opacity-50"
+                  title="Kirim sinyal unlock ke gate ESP32 via MQTT"
                 >
                   <Unlock className="w-3.5 h-3.5" />
                   <span>{unlockLoadingId === room.id ? 'Mengirim...' : 'Buka Pintu Jarak Jauh'}</span>
@@ -219,7 +228,7 @@ export default function RoomsPage() {
 
                 <button
                   onClick={() => handleDeleteRoom(room.id)}
-                  className="p-1.5 text-[#4A4A4A] hover:text-[#DC2626] hover:bg-[#FEE2E2] rounded-[2px] transition"
+                  className="btn-pill-danger p-2.5 text-xs font-semibold"
                   title="Hapus Ruangan"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -232,83 +241,87 @@ export default function RoomsPage() {
 
       {/* Modal Tambah Ruangan */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="bg-white border border-[#E5E7EB] rounded-[4px] max-w-md w-full p-6 space-y-4">
-            <h3 className="font-bold text-base text-[#1A1A1A] pb-2 border-b border-[#E5E7EB]">
-              Tambah Ruangan Laboratorium Baru
-            </h3>
-            <form onSubmit={handleAddRoom} className="space-y-3 text-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-100 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+            <div className="pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-lg text-slate-900">
+                Tambah Ruangan Laboratorium Baru
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">Daftarkan gate baru untuk sinkronisasi offline-first</p>
+            </div>
+
+            <form onSubmit={handleAddRoom} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#1A1A1A] mb-1">Nama Laboratorium</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Nama Laboratorium</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Laboratorium Komputasi Awan"
-                  className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-[#1A1A1A] mb-1">Kode Ruangan</label>
+                  <label className="block font-medium text-slate-700 mb-1.5 text-xs">Kode Ruangan</label>
                   <input
                     type="text"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="lab-04"
-                    className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-[#1A1A1A] mb-1">Kapasitas</label>
+                  <label className="block font-medium text-slate-700 mb-1.5 text-xs">Kapasitas</label>
                   <input
                     type="number"
                     value={capacity}
                     onChange={(e) => setCapacity(parseInt(e.target.value) || 30)}
-                    className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#1A1A1A] mb-1">API Key Gateway (Disimpan sebagai Hash SHA-256)</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">API Key Gateway (Hash SHA-256)</label>
                 <input
                   type="text"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="gw_lab04_secret_key_semarang_2026"
-                  className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                   required
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-[#1A1A1A] mb-1">Deskripsi & Lokasi</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Deskripsi & Lokasi</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Gedung D Lantai 3 Fakultas Teknik Undip Tembalang"
                   rows={2}
-                  className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2 border-t border-[#E5E7EB]">
+              <div className="flex justify-end space-x-2.5 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="btn-secondary px-4 py-1.5 text-xs"
+                  className="btn-pill-secondary px-5 py-2 text-xs font-semibold"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary px-4 py-1.5 text-xs"
+                  className="btn-pill-primary px-6 py-2 text-xs font-semibold shadow-sm"
                 >
                   {submitting ? 'Menyimpan...' : 'Simpan Ruangan'}
                 </button>

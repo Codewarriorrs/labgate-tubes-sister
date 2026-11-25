@@ -35,19 +35,7 @@ export async function evaluateAccess(
   const emergencyPin = context.emergencyPin || '1722';
   const pepper = context.pepper || 'labgate_undip_tembalang_secure_pepper_2026';
 
-  // 1. Cek Kedaluwarsa Cache Gateway (Batas default 24 jam)
-  if (context.lastSyncTime) {
-    const ageMs = now.getTime() - context.lastSyncTime.getTime();
-    if (ageMs > maxAgeHours * 3600 * 1000) {
-      return {
-        action: 'deny',
-        code: 'CACHE_KEDALUWARSA',
-        reason: 'Cache kedaluwarsa',
-      };
-    }
-  }
-
-  // 2. Evaluasi Metode Emergency Manual PIN (Petugas Piket)
+  // 1. Evaluasi Metode Emergency Manual PIN (Petugas Piket override selalu diprioritaskan)
   if (method === 'manual_pin') {
     if (payload.trim() === emergencyPin) {
       return {
@@ -60,7 +48,19 @@ export async function evaluateAccess(
       return {
         action: 'deny',
         code: 'PIN_SALAH',
-        reason: 'PIN Salah',
+        reason: 'PIN darurat salah',
+      };
+    }
+  }
+
+  // 2. Cek Kedaluwarsa Cache Gateway (Batas default 24 jam)
+  if (context.lastSyncTime) {
+    const ageMs = now.getTime() - context.lastSyncTime.getTime();
+    if (ageMs > maxAgeHours * 3600 * 1000) {
+      return {
+        action: 'deny',
+        code: 'CACHE_KEDALUWARSA',
+        reason: 'Cache kedaluwarsa',
       };
     }
   }

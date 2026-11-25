@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --primary: #1E293B;
+  --primary: #2A85FF;
   --secondary: #64748B;
-  --accent: #2563EB;
+  --accent: #2A85FF;
+  --dark: #0F172A;
   --background: #F8FAFC;
   --surface: #FFFFFF;
 }
@@ -17,94 +18,123 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Modern Gradient Buttons (Biru Gradasi Ungu) */
-.btn-primary {
-  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 50%, #7C3AED 100%);
+/* =========================================================
+   DentCare Design System Tokens
+   - Pill Buttons (rounded-full)
+   - Large Rounded Cards (rounded-2xl, rounded-3xl)
+   - Electric Blue (#2A85FF) & Obsidian Black (#0F172A)
+   ========================================================= */
+
+/* Primary Obsidian Black Pill Button */
+.btn-pill-primary {
+  background-color: #0F172A;
   color: #FFFFFF;
-  font-weight: 500;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.5rem 1.25rem;
-  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.8125rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.2);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
-.btn-primary:hover {
-  background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 50%, #6D28D9 100%);
-  box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35);
+.btn-pill-primary:hover {
+  background-color: #000000;
+  box-shadow: 0 4px 12px 0 rgba(15, 23, 42, 0.2);
   transform: translateY(-0.5px);
 }
-.btn-primary:active {
-  transform: translateY(1px);
+.btn-pill-primary:active {
+  transform: scale(0.98);
 }
 
-.btn-accent {
-  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+/* Electric Blue Pill Button */
+.btn-pill-blue {
+  background-color: #2A85FF;
   color: #FFFFFF;
-  font-weight: 500;
-  border-radius: 8px;
-  border: none;
-  padding: 0.375rem 0.875rem;
-  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.8125rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 150ms ease;
+  gap: 0.5rem;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 2px 8px 0 rgba(42, 133, 255, 0.25);
 }
-.btn-accent:hover {
-  background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%);
-  box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+.btn-pill-blue:hover {
+  background-color: #1E74E8;
+  box-shadow: 0 4px 14px 0 rgba(42, 133, 255, 0.35);
+  transform: translateY(-0.5px);
 }
-.btn-accent:active {
-  transform: translateY(1px);
+.btn-pill-blue:active {
+  transform: scale(0.98);
 }
 
-.btn-secondary {
+/* White Pill Secondary Button */
+.btn-pill-secondary {
   background-color: #FFFFFF;
   color: #334155;
-  font-weight: 500;
-  border-radius: 8px;
-  border: 1px solid #CBD5E1;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid #E2E8F0;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8125rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.375rem;
   transition: all 150ms ease;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
-.btn-secondary:hover {
-  background-color: #F1F5F9;
-  border-color: #94A3B8;
+.btn-pill-secondary:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
   color: #0F172A;
 }
-.btn-secondary:active {
-  transform: translateY(1px);
+.btn-pill-secondary:active {
+  transform: scale(0.98);
 }
 
-.btn-danger {
-  background-color: #EF4444;
-  color: #FFFFFF;
-  font-weight: 500;
-  border-radius: 8px;
-  border: 1px solid #DC2626;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+/* Danger Pill Button */
+.btn-pill-danger {
+  background-color: #FFFFFF;
+  color: #EF4444;
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid #FECACA;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8125rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.375rem;
   transition: all 150ms ease;
   cursor: pointer;
 }
-.btn-danger:hover {
-  background-color: #DC2626;
+.btn-pill-danger:hover {
+  background-color: #FEF2F2;
+  border-color: #F87171;
 }
-.btn-danger:active {
-  transform: translateY(1px);
+.btn-pill-danger:active {
+  transform: scale(0.98);
+}
+
+/* Legacy Alias Classes for Compatibility */
+.btn-primary {
+  @apply btn-pill-primary;
+}
+.btn-accent {
+  @apply btn-pill-blue;
+}
+.btn-secondary {
+  @apply btn-pill-secondary;
+}
+.btn-danger {
+  @apply btn-pill-danger;
 }

@@ -29,6 +29,10 @@ const DEMO_GATEWAY_KEY = 'gw_lab01_secret_key_semarang_2026';
 const DEMO_GATEWAY_KEY_HASH = hashApiKey(DEMO_GATEWAY_KEY);
 const ISYA_UID = '01020304';
 const ISYA_UID_HASH = hashCardUid(ISYA_UID);
+const MALVIN_UID = '11223344';
+const MALVIN_UID_HASH = hashCardUid(MALVIN_UID);
+const BINTANG_UID = '55667788';
+const BINTANG_UID_HASH = hashCardUid(BINTANG_UID);
 
 const now = new Date();
 const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() - 1, 0, 0);
@@ -58,7 +62,7 @@ const initialUsers: User[] = [
   },
   {
     id: 'usr_mhs_01',
-    name: 'Muhammad Isya Asyhari',
+    name: 'Isya',
     email: 'isya.asyhari@students.undip.ac.id',
     role: 'mahasiswa',
     department: 'Teknik Komputer',
@@ -67,20 +71,20 @@ const initialUsers: User[] = [
   },
   {
     id: 'usr_mhs_02',
-    name: 'Nabila Putri Rahmadhani',
-    email: 'nabila.putri@students.undip.ac.id',
+    name: 'Malvin',
+    email: 'malvin@students.undip.ac.id',
     role: 'mahasiswa',
-    department: 'Informatika',
-    nim: '21120124140022',
+    department: 'Teknik Komputer',
+    nim: '21120124130052',
     createdAt: new Date().toISOString(),
   },
   {
     id: 'usr_mhs_03',
-    name: 'Rizky Dwi Kurniawan',
-    email: 'rizky.dwi@students.undip.ac.id',
+    name: 'Bintang',
+    email: 'bintang@students.undip.ac.id',
     role: 'mahasiswa',
-    department: 'Teknik Elektro',
-    nim: '21120124120015',
+    department: 'Teknik Komputer',
+    nim: '21120124130053',
     createdAt: new Date().toISOString(),
   },
 ];
@@ -154,20 +158,30 @@ const initialCards: Card[] = [
     id: 'crd_01',
     userId: 'usr_mhs_01',
     uidHash: ISYA_UID_HASH,
-    label: 'KTM Utama Muhammad Isya Asyhari',
+    label: 'KTM Isya (Blue Card Wokwi)',
     isActive: true,
     createdAt: new Date().toISOString(),
-    userName: 'Muhammad Isya Asyhari',
+    userName: 'Isya',
     userRole: 'mahasiswa',
   },
   {
     id: 'crd_02',
     userId: 'usr_mhs_02',
-    uidHash: hashCardUid('05060708'),
-    label: 'KTM Nabila Putri',
+    uidHash: MALVIN_UID_HASH,
+    label: 'KTM Malvin (Green Card Wokwi)',
     isActive: true,
     createdAt: new Date().toISOString(),
-    userName: 'Nabila Putri Rahmadhani',
+    userName: 'Malvin',
+    userRole: 'mahasiswa',
+  },
+  {
+    id: 'crd_03',
+    userId: 'usr_mhs_03',
+    uidHash: BINTANG_UID_HASH,
+    label: 'KTM Bintang (Yellow Card Wokwi)',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    userName: 'Bintang',
     userRole: 'mahasiswa',
   },
 ];
@@ -176,7 +190,7 @@ const initialBookings: Booking[] = [
   {
     id: 'bkg_aktif_01',
     userId: 'usr_mhs_01',
-    userName: 'Muhammad Isya Asyhari',
+    userName: 'Isya',
     roomId: 'lab-01',
     roomName: 'Laboratorium Rekayasa Perangkat Lunak & Sistem Terintegrasi',
     roomCode: 'lab-01',
@@ -191,9 +205,43 @@ const initialBookings: Booking[] = [
     updatedAt: new Date().toISOString(),
   },
   {
-    id: 'bkg_menunggu_02',
+    id: 'bkg_aktif_02',
     userId: 'usr_mhs_02',
-    userName: 'Nabila Putri Rahmadhani',
+    userName: 'Malvin',
+    roomId: 'lab-01',
+    roomName: 'Laboratorium Rekayasa Perangkat Lunak & Sistem Terintegrasi',
+    roomCode: 'lab-01',
+    equipmentId: 'eq_02',
+    equipmentName: 'Development Board Kit ESP32 & IoT Sensor Pack',
+    purpose: 'Praktikum Sistem Tertanam dan Komputasi Tepi',
+    startTime: todayStart.toISOString(),
+    endTime: todayEnd.toISOString(),
+    status: 'disetujui',
+    qrToken: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'bkg_aktif_03',
+    userId: 'usr_mhs_03',
+    userName: 'Bintang',
+    roomId: 'lab-01',
+    roomName: 'Laboratorium Rekayasa Perangkat Lunak & Sistem Terintegrasi',
+    roomCode: 'lab-01',
+    equipmentId: 'eq_02',
+    equipmentName: 'Development Board Kit ESP32 & IoT Sensor Pack',
+    purpose: 'Riset Protokol Komunikasi IoT LabGate',
+    startTime: todayStart.toISOString(),
+    endTime: todayEnd.toISOString(),
+    status: 'disetujui',
+    qrToken: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'bkg_menunggu_04',
+    userId: 'usr_mhs_02',
+    userName: 'Malvin',
     roomId: 'lab-02',
     roomName: 'Laboratorium Sistem Tertanam & Robotika',
     roomCode: 'lab-02',
@@ -206,35 +254,6 @@ const initialBookings: Booking[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
-  {
-    id: 'bkg_ditolak_03',
-    userId: 'usr_mhs_03',
-    userName: 'Rizky Dwi Kurniawan',
-    roomId: 'lab-03',
-    roomName: 'Laboratorium Jaringan Komputer & Keamanan Siber',
-    roomCode: 'lab-03',
-    purpose: 'Praktikum Konfigurasi VLAN Trunking Cisco Catalyst',
-    startTime: new Date(now.getTime() - 86400000).toISOString(),
-    endTime: new Date(now.getTime() - 80000000).toISOString(),
-    status: 'ditolak',
-    rejectionReason: 'Ruangan sedang digunakan untuk praktikum terjadwal mahasiswa D3',
-    createdAt: new Date(now.getTime() - 90000000).toISOString(),
-    updatedAt: new Date(now.getTime() - 85000000).toISOString(),
-  },
-  {
-    id: 'bkg_dibatalkan_04',
-    userId: 'usr_mhs_01',
-    userName: 'Muhammad Isya Asyhari',
-    roomId: 'lab-01',
-    roomName: 'Laboratorium Rekayasa Perangkat Lunak & Sistem Terintegrasi',
-    roomCode: 'lab-01',
-    purpose: 'Diskusi Proyek Akhir Sistem Terintegrasi dengan Dosen',
-    startTime: new Date(now.getTime() - 172800000).toISOString(),
-    endTime: new Date(now.getTime() - 165600000).toISOString(),
-    status: 'dibatalkan',
-    createdAt: new Date(now.getTime() - 200000000).toISOString(),
-    updatedAt: new Date(now.getTime() - 175000000).toISOString(),
-  },
 ];
 
 // In-Memory Storage State
@@ -243,7 +262,10 @@ class MemoryStore {
   passwords: Record<string, string> = {
     'aryo.wicaksono@undip.ac.id': DEFAULT_PASSWORD_HASH,
     'danang.setiawan@undip.ac.id': DEFAULT_PASSWORD_HASH,
+    'isya@students.undip.ac.id': DEFAULT_PASSWORD_HASH,
     'isya.asyhari@students.undip.ac.id': DEFAULT_PASSWORD_HASH,
+    'malvin@students.undip.ac.id': DEFAULT_PASSWORD_HASH,
+    'bintang@students.undip.ac.id': DEFAULT_PASSWORD_HASH,
     'nabila.putri@students.undip.ac.id': DEFAULT_PASSWORD_HASH,
     'rizky.dwi@students.undip.ac.id': DEFAULT_PASSWORD_HASH,
   };
@@ -426,7 +448,7 @@ export async function findRoomByApiKey(apiKey: string): Promise<Room | null> {
   return memoryStore.rooms.find((r) => r.apiKeyHash === hash) || null;
 }
 
-export async function createRoom(data: Omit<Room, 'id' | 'createdAt' | 'apiKeyHash'> & { apiKey: string }): Promise<Room> {
+export async function createRoom(data: Omit<Room, 'id' | 'createdAt' | 'apiKeyHash' | 'queueCount'> & { apiKey: string }): Promise<Room> {
   const newRoom: Room = {
     id: data.code,
     name: data.name,

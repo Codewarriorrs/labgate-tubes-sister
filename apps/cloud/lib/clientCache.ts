@@ -23,7 +23,7 @@ export function invalidateCache(keyPrefix?: string): void {
     cacheStore.clear();
     return;
   }
-  for (const key of cacheStore.keys()) {
+  for (const key of Array.from(cacheStore.keys())) {
     if (key.startsWith(keyPrefix)) {
       cacheStore.delete(key);
     }

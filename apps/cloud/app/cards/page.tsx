@@ -85,19 +85,19 @@ export default function CardsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header: Direct flat typography without decorative nested boxes */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E5E7EB] pb-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Manajemen Kartu KTM RFID
           </h1>
-          <p className="text-xs text-[#4A4A4A] mt-1">
-            Pendaftaran UID fisik kartu ke identitas akun &bull; Disimpan dalam bentuk Hash SHA-256 (Hak Akses Kepala TU / Admin)
+          <p className="text-sm text-slate-500 mt-1">
+            Pendaftaran UID fisik kartu ke identitas akun &bull; Terenkripsi dengan Hash SHA-256
           </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-primary self-start sm:self-auto"
+          className="btn-pill-primary self-start sm:self-auto px-6 py-2.5 text-xs font-semibold flex items-center shadow-sm"
         >
           <Plus className="w-4 h-4 mr-1.5" />
           Daftarkan Kartu KTM
@@ -106,122 +106,103 @@ export default function CardsPage() {
 
       {feedback && (
         <div
-          className={`p-3 rounded-[4px] text-xs font-semibold flex items-start space-x-2 border ${
+          className={`p-4 rounded-2xl text-sm font-medium flex items-start space-x-3 border ${
             feedback.type === 'success'
-              ? 'bg-[#DCFCE7] text-[#15803D] border-[#86EFAC]'
-              : 'bg-[#FEE2E2] text-[#DC2626] border-[#FCA5A5]'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border-rose-200'
           }`}
         >
           {feedback.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" />
           ) : (
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
           )}
           <span>{feedback.message}</span>
         </div>
       )}
 
+      {/* Quick Reference Simulasi Wokwi */}
+      <div className="bg-[#EAF4FF] rounded-3xl p-6 border border-blue-100/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h3 className="font-bold text-sm text-[#2A85FF]">Preset Kartu RFID Simulasi Wokwi</h3>
+          <p className="text-xs text-slate-600 mt-0.5">
+            UID kartu fisik mahasiswa yang terpasang di reader RFID ESP32 Wokwi
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs text-slate-800 font-medium">
+            <span className="font-bold text-[#2A85FF]">Isya:</span> 01020304 (21120124130051)
+          </div>
+          <div className="bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs text-slate-800 font-medium">
+            <span className="font-bold text-emerald-600">Malvin:</span> 11223344 (21120124130052)
+          </div>
+          <div className="bg-white/90 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs text-slate-800 font-medium">
+            <span className="font-bold text-amber-600">Bintang:</span> 55667788 (21120124130053)
+          </div>
+        </div>
+      </div>
+
       {/* Main Content Area */}
       {loading ? (
-        <div className="p-8 text-center text-[#4A4A4A] text-xs font-semibold bg-white border border-[#E5E7EB] rounded-[4px]">
+        <div className="p-12 text-center text-slate-400 text-sm bg-white border border-slate-100 rounded-3xl">
           Memuat daftar kartu...
         </div>
       ) : cards.length === 0 ? (
-        <div className="p-8 text-center text-[#4A4A4A] text-xs bg-white rounded-[4px] border border-[#E5E7EB]">
+        <div className="p-12 text-center text-slate-400 text-sm bg-white rounded-3xl border border-slate-100">
           Belum ada kartu KTM RFID terdaftar.
         </div>
       ) : (
-        <>
-          {/* Desktop View: Flat Clean Table */}
-          <div className="hidden md:block bg-white border border-[#E5E7EB] rounded-[4px] overflow-hidden">
-            <table className="w-full text-left text-xs text-[#1A1A1A]">
-              <thead className="bg-[#F8F9FA] border-b border-[#E5E7EB] text-[#4A4A4A] font-semibold uppercase text-[11px]">
-                <tr>
-                  <th className="py-3 px-4">Label & ID</th>
-                  <th className="py-3 px-4">Pemilik (Mahasiswa / Dosen)</th>
-                  <th className="py-3 px-4">NIM / NIP</th>
-                  <th className="py-3 px-4">Hash UID (SHA-256)</th>
-                  <th className="py-3 px-4 text-center">Status</th>
-                  <th className="py-3 px-4 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E5E7EB]">
-                {cards.map((card) => (
-                  <tr key={card.id} className="hover:bg-[#F8F9FA] transition">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <CreditCard className="w-4 h-4 text-[#0066FF] shrink-0" />
-                        <div>
-                          <span className="font-bold text-[#1A1A1A] block">{card.label || 'KTM'}</span>
-                          <span className="font-mono text-[10px] text-[#4A4A4A]">{card.id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 font-semibold text-[#1A1A1A]">{card.userName}</td>
-                    <td className="py-3 px-4 font-mono text-[#4A4A4A]">{card.userNim || '-'}</td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-[#4A4A4A] break-all max-w-xs">
-                      {card.cardHash}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="font-mono text-[11px] font-bold text-[#16A34A]">[AKTIF]</span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        onClick={() => handleDeleteCard(card.id)}
-                        className="p-1.5 text-[#4A4A4A] hover:text-[#DC2626] hover:bg-[#FEE2E2] rounded-[2px] transition active:translate-y-[1px]"
-                        title="Hapus Kartu"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="bg-white border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.03)] rounded-3xl p-6 sm:p-8 space-y-4">
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Daftar Kartu Terdaftar
+              </h2>
+              <p className="text-xs text-slate-400">Kartu fisik yang memiliki izin akses pada gateway</p>
+            </div>
+            <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-0.5 rounded-md">
+              {cards.length} Kartu
+            </span>
           </div>
 
-          {/* Mobile View: Flat Clean Cards (No Horizontal Scroll & No Nested Boxes) */}
-          <div className="md:hidden space-y-3">
+          <div className="space-y-3">
             {cards.map((card) => (
               <div
                 key={card.id}
-                className="bg-white border border-[#E5E7EB] rounded-[4px] p-4 space-y-2.5"
+                className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-4 sm:p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md transition flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center space-x-2">
-                    <CreditCard className="w-4 h-4 text-[#0066FF] shrink-0" />
-                    <div>
-                      <span className="font-bold text-sm text-[#1A1A1A] block leading-tight">
-                        {card.label || 'KTM'}
-                      </span>
-                      <span className="font-mono text-[10px] text-[#4A4A4A]">{card.id}</span>
+                <div className="flex items-start sm:items-center space-x-4">
+                  <div className="w-14 h-14 rounded-2xl bg-[#EAF4FF] text-[#2A85FF] flex items-center justify-center shrink-0 shadow-xs">
+                    <CreditCard className="w-7 h-7" />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2 text-xs text-slate-500">
+                      <span className="font-bold text-slate-900 text-sm">{card.label || 'KTM Mahasiswa'}</span>
+                      <span>&bull;</span>
+                      <span className="font-mono text-slate-400">#{card.id}</span>
+                    </div>
+
+                    <div className="text-xs text-slate-700">
+                      Pemilik: <strong className="text-slate-900">{card.userName}</strong>
+                      {card.userNim && (
+                        <span className="text-slate-500 ml-2 font-mono">({card.userNim})</span>
+                      )}
+                    </div>
+
+                    <div className="text-[11px] font-mono text-slate-400 break-all max-w-xl">
+                      Hash SHA-256: {card.uidHash}
                     </div>
                   </div>
-                  <span className="font-mono text-[10px] font-bold text-[#16A34A]">[AKTIF]</span>
                 </div>
 
-                <div className="text-xs space-y-1 pt-1 text-[#1A1A1A]">
-                  <div className="flex justify-between">
-                    <span className="text-[#4A4A4A]">Pemilik:</span>
-                    <span className="font-semibold">{card.userName}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#4A4A4A]">NIM/NIP:</span>
-                    <span className="font-mono">{card.userNim || '-'}</span>
-                  </div>
-                  <div className="pt-1">
-                    <span className="text-[#4A4A4A] text-[10px] block mb-0.5">Hash UID:</span>
-                    <span className="font-mono text-[10px] text-[#1A1A1A] break-all block bg-[#F8F9FA] p-1.5 rounded-[2px]">
-                      {card.cardHash}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-[#E5E7EB] flex justify-between items-center">
-                  <span className="text-[10px] text-[#16A34A] font-semibold">Tersinkron ke Gateway</span>
+                <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                  <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                    Aktif &bull; Sinkron Gateway
+                  </span>
                   <button
                     onClick={() => handleDeleteCard(card.id)}
-                    className="p-1.5 text-[#DC2626] hover:bg-[#FEE2E2] rounded-[2px] transition flex items-center space-x-1 text-xs"
+                    className="btn-pill-danger px-4 py-2 text-xs font-semibold flex items-center space-x-1"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Hapus</span>
@@ -230,72 +211,78 @@ export default function CardsPage() {
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
 
       {/* Modal Registrasi Kartu */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-          <div className="bg-white border border-[#E5E7EB] rounded-[4px] max-w-md w-full p-6 space-y-4">
-            <h3 className="font-bold text-base text-[#1A1A1A] pb-2 border-b border-[#E5E7EB]">
-              Registrasi Kartu KTM RFID Baru
-            </h3>
-            <form onSubmit={handleRegisterCard} className="space-y-3 text-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-100 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+            <div className="pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-lg text-slate-900">
+                Registrasi Kartu KTM RFID Baru
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">Hubungkan identitas pemilik kartu ke gateway</p>
+            </div>
+
+            <form onSubmit={handleRegisterCard} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#1A1A1A] mb-1">Target Pengguna</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Target Pengguna</label>
                 <select
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                   required
                 >
-                  <option value="usr-001">Muhammad Isya Asyhari (21120121130001)</option>
-                  <option value="usr-002">Dr. Ir. Danang Setiawan (197508152000031001)</option>
-                  <option value="usr-003">Aryo Wicaksono, S.Kom. (198810202015041002)</option>
+                  <option value="usr_mhs_01">Isya (21120124130051)</option>
+                  <option value="usr_mhs_02">Malvin (21120124130052)</option>
+                  <option value="usr_mhs_03">Bintang (21120124130053)</option>
+                  <option value="usr_dosen_01">Dr. Ir. Danang Setiawan, M.T. (197808202005011001)</option>
+                  <option value="usr_admin_01">Aryo Wicaksono, S.Kom. (198503152010121002)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#1A1A1A] mb-1">
-                  UID Fisik Kartu (Contoh: 01020304 atau A1B2C3D4)
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">
+                  UID Fisik Kartu (Contoh: 01020304 atau 11223344)
                 </label>
                 <input
                   type="text"
                   value={rawUid}
                   onChange={(e) => setRawUid(e.target.value)}
                   placeholder="01020304"
-                  className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] font-mono bg-white text-[#1A1A1A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                   required
                 />
-                <p className="text-[11px] text-[#4A4A4A] mt-1">
+                <p className="text-[11px] text-slate-400 mt-1">
                   UID langsung di-hash dengan SHA-256 dan pepper rahasia di server cloud sebelum disimpan.
                 </p>
               </div>
 
               <div>
-                <label className="block font-semibold text-[#1A1A1A] mb-1">Label Kartu</label>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Label Kartu</label>
                 <input
                   type="text"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
                   placeholder="KTM Utama Mahasiswa"
-                  className="w-full px-3 py-2 rounded-[4px] border border-[#D1D5DB] focus:outline-none focus:border-[#0066FF] bg-white text-[#1A1A1A]"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
                   required
                 />
               </div>
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-[#E5E7EB]">
+              <div className="flex justify-end space-x-2.5 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="btn-secondary px-4 py-1.5 text-xs"
+                  className="btn-pill-secondary px-5 py-2 text-xs font-semibold"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn-primary px-4 py-1.5 text-xs"
+                  className="btn-pill-primary px-6 py-2 text-xs font-semibold shadow-sm"
                 >
                   {submitting ? 'Mendaftarkan...' : 'Daftarkan Kartu'}
                 </button>

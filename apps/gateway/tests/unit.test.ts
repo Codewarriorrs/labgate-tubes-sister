@@ -34,6 +34,7 @@ describe('Gateway Service 2 Decision Engine Unit Tests', () => {
 
   const baseContext: DecisionContext = {
     roomCode: 'lab-01',
+    currentTime: new Date('2026-11-24T10:00:00.000Z'),
     cachedBookings: mockBookings,
     lastSyncTime: new Date('2026-11-24T09:00:00.000Z'),
     maxCacheAgeHours: 24,
