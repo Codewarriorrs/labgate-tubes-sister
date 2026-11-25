@@ -47,7 +47,6 @@ unsigned long stateTimer = 0;
 unsigned long holdDuration = 5000;
 unsigned long lastStatusPublish = 0;
 unsigned long lastMqttReconnectAttempt = 0;
-String lastScannedUid = "";
 
 void setLcdIdle() {
   lcd.clear();
@@ -177,28 +176,6 @@ void setupWiFi() {
   }
 }
 
-void grantAccessLocal(const char* userName) {
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("AKSES DITERIMA");
-  lcd.setCursor(0, 1);
-  char truncatedName[17];
-  strncpy(truncatedName, userName, 16);
-  truncatedName[16] = '\0';
-  lcd.print(truncatedName);
-
-  digitalWrite(RELAY_PIN, HIGH);
-  digitalWrite(LED_GREEN, HIGH);
-  digitalWrite(LED_RED, LOW);
-  tone(BUZZER_PIN, 2000, 150);
-  delay(180);
-  tone(BUZZER_PIN, 2500, 150);
-
-  holdDuration = 5000;
-  currentState = STATE_DOOR_OPEN;
-  stateTimer = millis();
-}
-
 void denyAccessLocal(const char* reason) {
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -218,27 +195,8 @@ void denyAccessLocal(const char* reason) {
   stateTimer = millis();
 }
 
-void verifyLocalOffline(String uidStr) {
-  uidStr.toLowerCase();
-  Serial.println("[MODE OFFLINE] Memverifikasi UID secara lokal: " + uidStr);
-  if (uidStr == "01020304") {
-    Serial.println("[OFFLINE] AKSES DITERIMA -> Isya");
-    grantAccessLocal("Isya");
-  } else if (uidStr == "11223344") {
-    Serial.println("[OFFLINE] AKSES DITERIMA -> Malvin");
-    grantAccessLocal("Malvin");
-  } else if (uidStr == "55667788") {
-    Serial.println("[OFFLINE] AKSES DITERIMA -> Bintang");
-    grantAccessLocal("Bintang");
-  } else {
-    Serial.println("[OFFLINE] AKSES DITOLAK -> Kartu Tidak Dikenal");
-    denyAccessLocal("Kartu Tdk Sah");
-  }
-}
-
 void triggerRfidScan(String uidStr) {
   uidStr.toLowerCase();
-  lastScannedUid = uidStr;
   Serial.println("\n[SCAN RFID] Memproses UID: " + uidStr);
 
   if (mqttClient.connected()) {
@@ -263,7 +221,8 @@ void triggerRfidScan(String uidStr) {
     currentState = STATE_WAITING_RESPONSE;
     stateTimer = millis();
   } else {
-    verifyLocalOffline(uidStr);
+    Serial.println("[ERROR] Gateway / MQTT tidak terhubung! Pintu tetap terkunci.");
+    denyAccessLocal("Gateway Offline");
   }
 }
 
@@ -373,10 +332,10 @@ void loop() {
       break;
 
     case STATE_WAITING_RESPONSE:
-      // Jika Gateway tidak merespon dalam 2 detik, otomatis fallback ke Mode Offline Lokal
-      if (now - stateTimer > 2000) {
-        Serial.println("[TIMEOUT] Gateway tidak merespon, beralih ke Mode Offline Lokal...");
-        verifyLocalOffline(lastScannedUid);
+      // Timeout jika Gateway tidak merespon dalam 4 detik
+      if (now - stateTimer > 4000) {
+        Serial.println("[TIMEOUT] Gateway tidak merespon. Pastikan Edge Gateway berjalan.");
+        denyAccessLocal("Gate Timeout");
       }
       break;
 
