@@ -47,6 +47,7 @@ unsigned long stateTimer = 0;
 unsigned long holdDuration = 5000;
 unsigned long lastStatusPublish = 0;
 unsigned long lastMqttReconnectAttempt = 0;
+String lastScannedUid = "";
 
 void setLcdIdle() {
   lcd.clear();
@@ -217,8 +218,27 @@ void denyAccessLocal(const char* reason) {
   stateTimer = millis();
 }
 
+void verifyLocalOffline(String uidStr) {
+  uidStr.toLowerCase();
+  Serial.println("[MODE OFFLINE] Memverifikasi UID secara lokal: " + uidStr);
+  if (uidStr == "01020304") {
+    Serial.println("[OFFLINE] AKSES DITERIMA -> Isya");
+    grantAccessLocal("Isya");
+  } else if (uidStr == "11223344") {
+    Serial.println("[OFFLINE] AKSES DITERIMA -> Malvin");
+    grantAccessLocal("Malvin");
+  } else if (uidStr == "55667788") {
+    Serial.println("[OFFLINE] AKSES DITERIMA -> Bintang");
+    grantAccessLocal("Bintang");
+  } else {
+    Serial.println("[OFFLINE] AKSES DITOLAK -> Kartu Tidak Dikenal");
+    denyAccessLocal("Kartu Tdk Sah");
+  }
+}
+
 void triggerRfidScan(String uidStr) {
   uidStr.toLowerCase();
+  lastScannedUid = uidStr;
   Serial.println("\n[SCAN RFID] Memproses UID: " + uidStr);
 
   if (mqttClient.connected()) {
@@ -243,21 +263,7 @@ void triggerRfidScan(String uidStr) {
     currentState = STATE_WAITING_RESPONSE;
     stateTimer = millis();
   } else {
-    // Fallback Mode Offline Lokal jika MQTT / Gateway belum terhubung
-    Serial.println("[MODE OFFLINE] Memverifikasi UID secara lokal...");
-    if (uidStr == "01020304") {
-      Serial.println("[OFFLINE] AKSES DITERIMA -> Isya");
-      grantAccessLocal("Isya");
-    } else if (uidStr == "11223344") {
-      Serial.println("[OFFLINE] AKSES DITERIMA -> Malvin");
-      grantAccessLocal("Malvin");
-    } else if (uidStr == "55667788") {
-      Serial.println("[OFFLINE] AKSES DITERIMA -> Bintang");
-      grantAccessLocal("Bintang");
-    } else {
-      Serial.println("[OFFLINE] AKSES DITOLAK -> Kartu Tidak Dikenal");
-      denyAccessLocal("Kartu Tdk Sah");
-    }
+    verifyLocalOffline(uidStr);
   }
 }
 
@@ -367,15 +373,10 @@ void loop() {
       break;
 
     case STATE_WAITING_RESPONSE:
-      // Timeout jika gateway tidak merespon dalam 3 detik
-      if (now - stateTimer > 3000) {
-        lcd.clear();
-        lcd.setCursor(0, 0);
-        lcd.print("GATE TIMEOUT");
-        lcd.setCursor(0, 1);
-        lcd.print("Coba Lagi");
-        currentState = STATE_DENIED;
-        stateTimer = now;
+      // Jika Gateway tidak merespon dalam 2 detik, otomatis fallback ke Mode Offline Lokal
+      if (now - stateTimer > 2000) {
+        Serial.println("[TIMEOUT] Gateway tidak merespon, beralih ke Mode Offline Lokal...");
+        verifyLocalOffline(lastScannedUid);
       }
       break;
 
