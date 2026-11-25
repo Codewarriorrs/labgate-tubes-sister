@@ -146,7 +146,27 @@ export default function DashboardPage() {
       return;
     }
 
-    // 2. Validasi Jam Kerja (06.00 - 19.00 WIB) dinonaktifkan sementara untuk pengetesan 24 jam
+    // 2. Validasi Jam Kerja (06.00 - 19.00 WIB) - dikomen sementara untuk pengetesan
+    /*
+    const startHour = startDate.getHours();
+    const endHour = endDate.getHours();
+    const endMin = endDate.getMinutes();
+
+    if (startHour < 6) {
+      setFeedback({
+        type: 'error',
+        message: 'Peminjaman laboratorium hanya diperbolehkan mulai pukul 06.00 WIB.',
+      });
+      return;
+    }
+    if (endHour > 19 || (endHour === 19 && endMin > 0)) {
+      setFeedback({
+        type: 'error',
+        message: 'Peminjaman laboratorium hanya diperbolehkan maksimal hingga pukul 19.00 WIB.',
+      });
+      return;
+    }
+    */
 
     setSubmitting(true);
 
