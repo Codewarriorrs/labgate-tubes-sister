@@ -22,7 +22,11 @@ export async function GET(req: NextRequest) {
   try {
     const roomCode = req.nextUrl.searchParams.get('room') || 'lab-01';
     const rooms = await listRooms();
-    const room = rooms.find((r) => r.code.toLowerCase() === roomCode.toLowerCase());
+    const room = rooms.find(
+      (r) =>
+        r.code.toLowerCase() === roomCode.toLowerCase() ||
+        r.name.toLowerCase() === roomCode.toLowerCase()
+    );
 
     if (!room) {
       return NextResponse.json({ action: 'idle', error: 'Ruangan tidak ditemukan' }, { status: 404 });
@@ -68,7 +72,11 @@ export async function POST(req: NextRequest) {
       listRooms(),
       method === 'rfid' ? listCards() : Promise.resolve([]),
     ]);
-    const room = rooms.find((r) => r.code.toLowerCase() === roomCode.toLowerCase());
+    const room = rooms.find(
+      (r) =>
+        r.code.toLowerCase() === roomCode.toLowerCase() ||
+        r.name.toLowerCase() === roomCode.toLowerCase()
+    );
 
     if (!room) {
       return NextResponse.json({ action: 'deny', reason: 'Lab tdk ada' }, { status: 404 });
