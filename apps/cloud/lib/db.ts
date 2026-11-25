@@ -298,6 +298,79 @@ class MemoryStore {
 
 export const memoryStore = new MemoryStore();
 
+let dbSeedChecked = false;
+let seedPromise: Promise<void> | null = null;
+
+/**
+ * Memastikan database PostgreSQL terisi data awal jika tabel baru saja dibuat (kosong).
+ */
+async function ensureDatabaseSeeded(): Promise<void> {
+  if (!pool || dbSeedChecked) return;
+  if (seedPromise) return seedPromise;
+
+  seedPromise = (async () => {
+    try {
+      const { rows } = await pool.query('SELECT COUNT(*)::int AS cnt FROM rooms');
+      if (rows[0]?.cnt === 0) {
+        for (const u of initialUsers) {
+          await pool.query(
+            `INSERT INTO users (id, name, email, password_hash, role, department, nim, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING`,
+            [u.id, u.name, u.email, DEFAULT_PASSWORD_HASH, u.role, u.department, u.nim || null, u.createdAt]
+          );
+        }
+        for (const r of initialRooms) {
+          await pool.query(
+            `INSERT INTO rooms (id, name, code, capacity, description, api_key_hash, is_active, last_seen, last_sync, version, queue_count, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING`,
+            [r.id, r.name, r.code, r.capacity, r.description, r.apiKeyHash, r.isActive, r.lastSeen || null, r.lastSync || null, r.version || null, r.queueCount || 0, r.createdAt]
+          );
+        }
+        for (const eq of initialEquipment) {
+          await pool.query(
+            `INSERT INTO equipment (id, room_id, name, category, is_available, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`,
+            [eq.id, eq.roomId, eq.name, 'Peralatan Lab', eq.isAvailable, eq.createdAt]
+          );
+        }
+        for (const c of initialCards) {
+          await pool.query(
+            `INSERT INTO cards (id, user_id, uid_hash, label, created_at)
+             VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`,
+            [c.id, c.userId, c.uidHash, c.label, c.createdAt]
+          );
+        }
+        for (const b of initialBookings) {
+          let qrToken = b.qrToken || null;
+          if (b.status === 'disetujui' && !qrToken) {
+            qrToken = await signQrTicket({
+              bookingId: b.id,
+              roomId: b.roomId,
+              roomCode: b.roomCode || b.roomId,
+              userId: b.userId,
+              userName: b.userName || 'Mahasiswa',
+              startTime: b.startTime,
+              endTime: b.endTime,
+            });
+          }
+          await pool.query(
+            `INSERT INTO bookings (id, user_id, room_id, equipment_id, purpose, start_time, end_time, status, rejection_reason, qr_token, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING`,
+            [b.id, b.userId, b.roomId, b.equipmentId || null, b.purpose, b.startTime, b.endTime, b.status, b.rejectionReason || null, qrToken, b.createdAt, b.updatedAt]
+          );
+        }
+      }
+      dbSeedChecked = true;
+    } catch (err) {
+      console.error('[ensureDatabaseSeeded Error]', err);
+    } finally {
+      seedPromise = null;
+    }
+  })();
+
+  return seedPromise;
+}
+
 // ==========================================
 // REPOSITORY METHODS (POSTGRES / MEMORY FALLBACK)
 // ==========================================
@@ -305,6 +378,7 @@ export const memoryStore = new MemoryStore();
 export async function findUserByEmail(email: string): Promise<(User & { passwordHash: string }) | null> {
   const normEmail = email.toLowerCase().trim();
   if (pool) {
+    await ensureDatabaseSeeded();
     try {
       const res = await pool.query('SELECT * FROM users WHERE LOWER(email) = $1', [normEmail]);
       if (res.rows.length > 0) {
@@ -356,6 +430,7 @@ export async function findUserById(id: string): Promise<User | null> {
 
 export async function listUsers(): Promise<User[]> {
   if (pool) {
+    await ensureDatabaseSeeded();
     try {
       const res = await pool.query('SELECT id, name, email, role, department, nim, created_at FROM users ORDER BY name ASC');
       return res.rows.map((r) => ({
@@ -374,6 +449,7 @@ export async function listUsers(): Promise<User[]> {
 
 export async function listRooms(): Promise<Room[]> {
   if (pool) {
+    await ensureDatabaseSeeded();
     try {
       const res = await pool.query('SELECT * FROM rooms ORDER BY code ASC');
       return res.rows.map((r) => ({
