@@ -115,35 +115,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Validasi Jam Kerja Operasional (06.00 - 19.00 WIB)
-    // Hitung jam dalam Waktu Indonesia Barat (UTC+7)
-    const startDate = new Date(start);
-    const startHourWib = (startDate.getUTCHours() + 7) % 24;
-    const endDate = new Date(end);
-    const endHourWib = (endDate.getUTCHours() + 7) % 24;
-    const endMinWib = endDate.getUTCMinutes();
-
-    if (startHourWib < 6) {
-      return NextResponse.json(
-        {
-          success: false,
-          data: null,
-          message: 'Peminjaman laboratorium hanya diperbolehkan mulai pukul 06.00 WIB',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (endHourWib > 19 || (endHourWib === 19 && endMinWib > 0)) {
-      return NextResponse.json(
-        {
-          success: false,
-          data: null,
-          message: 'Peminjaman laboratorium hanya diperbolehkan maksimal hingga pukul 19.00 WIB',
-        },
-        { status: 400 }
-      );
-    }
+    // 3. Validasi Jam Kerja Operasional (06.00 - 19.00 WIB) dinonaktifkan sementara untuk pengetesan 24 jam
+    // (Dapat diaktifkan kembali jika diperlukan untuk produksi)
 
     const room = await getRoomById(roomId);
     if (!room) {

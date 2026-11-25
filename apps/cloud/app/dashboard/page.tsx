@@ -146,25 +146,7 @@ export default function DashboardPage() {
       return;
     }
 
-    // 2. Validasi Jam Kerja (06.00 - 19.00 WIB)
-    const startHour = startDate.getHours();
-    const endHour = endDate.getHours();
-    const endMin = endDate.getMinutes();
-
-    if (startHour < 6) {
-      setFeedback({
-        type: 'error',
-        message: 'Peminjaman laboratorium hanya diperbolehkan mulai pukul 06.00 WIB.',
-      });
-      return;
-    }
-    if (endHour > 19 || (endHour === 19 && endMin > 0)) {
-      setFeedback({
-        type: 'error',
-        message: 'Peminjaman laboratorium hanya diperbolehkan maksimal hingga pukul 19.00 WIB.',
-      });
-      return;
-    }
+    // 2. Validasi Jam Kerja (06.00 - 19.00 WIB) dinonaktifkan sementara untuk pengetesan 24 jam
 
     setSubmitting(true);
 
@@ -360,7 +342,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Waktu Mulai Akses (Min. 06.00 WIB)
+                  Waktu Mulai Akses
                 </label>
                 <input
                   type="datetime-local"
@@ -374,7 +356,7 @@ export default function DashboardPage() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Waktu Selesai Akses (Maks. 19.00 WIB)
+                  Waktu Selesai Akses
                 </label>
                 <input
                   type="datetime-local"
