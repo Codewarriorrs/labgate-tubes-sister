@@ -60,6 +60,7 @@ DoorState currentState = STATE_IDLE;
 unsigned long stateTimer = 0;
 unsigned long holdDuration = 5000;
 unsigned long lastPollTime = 0;
+unsigned long lastWifiRetryTime = 0;
 
 String pinBuffer = "";
 unsigned long lastKeyPressTime = 0;
@@ -121,11 +122,13 @@ void denyDoor(const char* reason) {
 
 void setupWiFi() {
   WiFi.mode(WIFI_STA);
-  // Channel 6 adalah channel default Wokwi-GUEST agar koneksi cepat (~1 detik)
+  WiFi.disconnect(true);
+  delay(100);
+  // Channel 6 adalah channel default Wokwi-GUEST agar koneksi cepat
   WiFi.begin(WIFI_SSID, WIFI_PASS, 6);
   Serial.print("Menghubungkan ke WiFi");
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+  while (WiFi.status() != WL_CONNECTED && attempts < 40) {
     delay(250);
     Serial.print(".");
     attempts++;
@@ -133,7 +136,7 @@ void setupWiFi() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\nWiFi Terhubung! IP: " + WiFi.localIP().toString());
   } else {
-    Serial.println("\n[INFO] WiFi offline. Hanya Keypad PIN Darurat yang aktif.");
+    Serial.println("\n[INFO] WiFi belum terhubung, akan mencoba ulang di latar belakang.");
   }
 }
 
@@ -344,14 +347,21 @@ void setup() {
 void loop() {
   unsigned long now = millis();
 
+  // Auto-reconnect WiFi di latar belakang jika sempat terputus / lambat saat boot
+  if (WiFi.status() != WL_CONNECTED && (now - lastWifiRetryTime > 10000)) {
+    lastWifiRetryTime = now;
+    Serial.println("[WIFI] Mencoba menghubungkan ulang ke Wokwi-GUEST...");
+    WiFi.begin(WIFI_SSID, WIFI_PASS, 6);
+  }
+
   switch (currentState) {
     case STATE_IDLE:
       checkKeypadInput();
       checkSerialInputs();
       checkRfidHardware();
 
-      // Polling perintah Remote Unlock dari Cloud tiap 5 detik (saat tidak sedang mengetik PIN)
-      if (pinBuffer.length() == 0 && (now - lastPollTime > 5000)) {
+      // Polling perintah Remote Unlock dari Cloud tiap 15 detik (saat tidak sedang mengetik PIN)
+      if (pinBuffer.length() == 0 && (now - lastPollTime > 15000)) {
         lastPollTime = now;
         pollRemoteUnlock();
       }
