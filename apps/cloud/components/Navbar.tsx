@@ -63,13 +63,13 @@ export default function Navbar({ user }: NavbarProps) {
   const getRoleBadgeStyle = (role: string) => {
     switch (role.toLowerCase()) {
       case 'dosen':
-        return 'bg-blue-50 text-[#2A85FF] border border-blue-200/60';
+        return 'bg-[#2A85FF] text-white';
       case 'admin':
-        return 'bg-purple-50 text-purple-700 border border-purple-200/60';
+        return 'bg-purple-600 text-white';
       case 'mahasiswa':
-        return 'bg-slate-100 text-slate-700 border border-slate-200/60';
+        return 'bg-slate-900 text-white';
       default:
-        return 'bg-slate-100 text-slate-700 border border-slate-200/60';
+        return 'bg-slate-800 text-white';
     }
   };
 

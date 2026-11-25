@@ -6,56 +6,56 @@
     {
       "type": "board-esp32-devkit-c-v4",
       "id": "esp",
-      "top": 80,
-      "left": 140,
+      "top": 60,
+      "left": 120,
       "attrs": {}
     },
     {
       "type": "wokwi-lcd1602",
       "id": "lcd",
-      "top": -190,
-      "left": 0,
+      "top": -210,
+      "left": 20,
       "attrs": { "pins": "i2c" }
     },
     {
       "type": "board-mfrc522",
       "id": "rfid",
-      "top": -30,
-      "left": -220,
+      "top": -40,
+      "left": -240,
       "attrs": { "uid": "01:02:03:04" }
     },
     {
       "type": "wokwi-relay-module",
       "id": "relay",
-      "top": 240,
-      "left": -220,
+      "top": 220,
+      "left": -240,
       "attrs": {}
     },
     {
       "type": "wokwi-buzzer",
       "id": "buzzer",
-      "top": -160,
+      "top": -190,
       "left": 380,
       "attrs": { "volume": "0.1" }
     },
     {
       "type": "wokwi-led",
       "id": "led_green",
-      "top": 10,
+      "top": -20,
       "left": 380,
       "attrs": { "color": "green", "label": "Status: Granted" }
     },
     {
       "type": "wokwi-led",
       "id": "led_red",
-      "top": 90,
+      "top": 60,
       "left": 380,
       "attrs": { "color": "red", "label": "Status: Denied" }
     },
     {
       "type": "wokwi-membrane-keypad",
       "id": "keypad",
-      "top": 200,
+      "top": 170,
       "left": 380,
       "attrs": {}
     }
@@ -64,41 +64,42 @@
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
 
-    [ "rfid:3.3V", "esp:3V3", "red", [ "h-20", "v40", "h360" ] ],
-    [ "rfid:RST", "esp:27", "orange", [ "h-30", "v130", "h370" ] ],
-    [ "rfid:GND", "esp:GND.1", "black", [ "h-40", "v180", "h380" ] ],
+    [ "rfid:3.3V", "esp:3V3", "red", [ "h-15", "v40", "h340" ] ],
+    [ "rfid:RST", "esp:27", "orange", [ "h-25", "v130", "h345" ] ],
+    [ "rfid:GND", "esp:GND.1", "black", [ "h-35", "v190", "h355" ] ],
 
-    [ "rfid:SDA", "esp:5", "yellow", [ "h-50", "v-80", "h530", "v310", "h-110" ] ],
-    [ "rfid:SCK", "esp:18", "green", [ "h-60", "v-100", "h560", "v320", "h-130" ] ],
-    [ "rfid:MOSI", "esp:23", "blue", [ "h-70", "v-120", "h590", "v230", "h-150" ] ],
-    [ "rfid:MISO", "esp:19", "purple", [ "h-80", "v-140", "h620", "v280", "h-170" ] ],
+    [ "rfid:SDA", "esp:5", "yellow", [ "h-50", "v310", "h550", "v-190" ] ],
+    [ "rfid:SCK", "esp:18", "green", [ "h-60", "v330", "h570", "v-210" ] ],
+    [ "rfid:MOSI", "esp:23", "blue", [ "h-70", "v350", "h590", "v-310" ] ],
+    [ "rfid:MISO", "esp:19", "purple", [ "h-80", "v370", "h610", "v-260" ] ],
 
-    [ "lcd:GND", "esp:GND.1", "black", [ "h-30", "v440", "h150" ] ],
-    [ "lcd:VCC", "esp:5V", "red", [ "h-40", "v480", "h160" ] ],
-    [ "lcd:SDA", "esp:21", "blue", [ "h-20", "v-50", "h480", "v380", "h-130" ] ],
-    [ "lcd:SCL", "esp:22", "yellow", [ "h-10", "v-70", "h500", "v340", "h-150" ] ],
+    [ "lcd:GND", "esp:GND.1", "black", [ "h-20", "v410", "h110" ] ],
+    [ "lcd:VCC", "esp:5V", "red", [ "h-30", "v460", "h120" ] ],
+    [ "lcd:SDA", "esp:21", "blue", [ "h-10", "v-45", "h300", "v330", "h-60" ] ],
+    [ "lcd:SCL", "esp:22", "yellow", [ "h-45", "v-55", "h345", "v320", "h-70" ] ],
 
-    [ "relay:VCC", "esp:5V", "red", [ "h-20", "v60", "h360" ] ],
-    [ "relay:GND", "esp:GND.1", "black", [ "h-30", "v-20", "h370" ] ],
-    [ "relay:IN", "esp:26", "purple", [ "h-40", "v-70", "h380" ] ],
+    [ "relay:VCC", "esp:5V", "red", [ "h20", "v15", "h200" ] ],
+    [ "relay:GND", "esp:GND.1", "black", [ "h25", "v-25", "h195" ] ],
+    [ "relay:IN", "esp:26", "purple", [ "h30", "v-75", "h190" ] ],
 
-    [ "buzzer:1", "esp:GND.2", "black", [ "v20", "h-80", "v180", "h-30" ] ],
-    [ "buzzer:2", "esp:2", "orange", [ "v40", "h60", "v330", "h-160" ] ],
+    [ "buzzer:1", "esp:GND.2", "black", [ "v20", "h-90", "v220" ] ],
+    [ "buzzer:2", "esp:2", "orange", [ "v30", "h-70", "v310" ] ],
 
-    [ "led_green:C", "esp:GND.2", "black", [ "v0", "h-80", "v50", "h-30" ] ],
-    [ "led_green:A", "esp:15", "green", [ "v10", "h50", "v200", "h-140" ] ],
+    [ "led_green:C", "esp:GND.2", "black", [ "h-80", "v80" ] ],
+    [ "led_green:A", "esp:15", "green", [ "h-60", "v210" ] ],
 
-    [ "led_red:C", "esp:GND.2", "black", [ "v0", "h-80", "v-20", "h-30" ] ],
-    [ "led_red:A", "esp:4", "red", [ "v10", "h40", "v110", "h-120" ] ],
+    [ "led_red:C", "esp:GND.2", "black", [ "h-80", "v0" ] ],
+    [ "led_red:A", "esp:4", "red", [ "h-50", "v110" ] ],
 
-    [ "keypad:R1", "esp:32", "cyan", [ "v20", "h-320", "v-240" ] ],
-    [ "keypad:R2", "esp:33", "cyan", [ "v30", "h-330", "v-230" ] ],
-    [ "keypad:R3", "esp:25", "cyan", [ "v40", "h-340", "v-220" ] ],
-    [ "keypad:R4", "esp:14", "cyan", [ "v50", "h-350", "v-210" ] ],
-    [ "keypad:C1", "esp:13", "magenta", [ "v60", "h-360", "v-200" ] ],
-    [ "keypad:C2", "esp:17", "magenta", [ "v20", "h-130", "v-130" ] ],
-    [ "keypad:C3", "esp:16", "magenta", [ "v30", "h-120", "v-130" ] ],
-    [ "keypad:C4", "esp:12", "magenta", [ "v70", "h-370", "v-190" ] ]
+    [ "keypad:C2", "esp:17", "magenta", [ "v20", "h-130", "v-150" ] ],
+    [ "keypad:C3", "esp:16", "magenta", [ "v30", "h-140", "v-145" ] ],
+
+    [ "keypad:R1", "esp:32", "cyan", [ "v40", "h-340", "v-250" ] ],
+    [ "keypad:R2", "esp:33", "cyan", [ "v50", "h-350", "v-245" ] ],
+    [ "keypad:R3", "esp:25", "cyan", [ "v60", "h-360", "v-240" ] ],
+    [ "keypad:R4", "esp:14", "cyan", [ "v70", "h-370", "v-215" ] ],
+    [ "keypad:C1", "esp:13", "magenta", [ "v80", "h-380", "v-210" ] ],
+    [ "keypad:C4", "esp:12", "magenta", [ "v90", "h-390", "v-230" ] ]
   ],
   "dependencies": {}
 }

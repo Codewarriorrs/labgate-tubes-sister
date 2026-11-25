@@ -20,10 +20,8 @@
 const char* WIFI_SSID = "Wokwi-GUEST";
 const char* WIFI_PASS = "";
 
-// Masukkan URL Cloud Anda (Vercel atau ngrok, TANPA slash di akhir)
-// Contoh Vercel: "https://nama-project-anda.vercel.app"
-// Contoh Ngrok : "https://xxxx.ngrok-free.app"
-const char* CLOUD_URL = "https://labgate.vercel.app";
+// URL Cloud Production Anda (Vercel)
+const char* CLOUD_URL = "https://labgate-tubes-sister.vercel.app";
 
 const char* ROOM_CODE = "lab-01";
 const char* EMERGENCY_PIN = "1722";
@@ -377,3 +375,4 @@ void loop() {
 
   delay(20);
 }
+

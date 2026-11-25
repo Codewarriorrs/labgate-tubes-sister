@@ -185,7 +185,7 @@ export default function ApprovalPage() {
                           <span className="text-xs font-mono text-slate-400 mt-0.5 block">{b.id}</span>
                         </div>
                       </div>
-                      <span className="bg-amber-50 text-amber-700 border border-amber-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs shrink-0">
+                      <span className="bg-amber-500 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs shrink-0">
                         Menunggu
                       </span>
                     </div>
@@ -200,9 +200,9 @@ export default function ApprovalPage() {
                       </div>
 
                       {b.equipmentName && (
-                        <div className="flex items-center space-x-2 text-[#2A85FF]">
-                          <Cpu className="w-4 h-4 shrink-0" />
-                          <span className="font-medium bg-blue-50 px-2 py-0.5 rounded-md">
+                        <div className="flex items-center space-x-2 text-slate-800">
+                          <Cpu className="w-4 h-4 shrink-0 text-[#2A85FF]" />
+                          <span className="font-medium bg-white border border-slate-300 px-2 py-0.5 rounded-md">
                             Alat: {b.equipmentName}
                           </span>
                         </div>
@@ -310,8 +310,8 @@ export default function ApprovalPage() {
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
                         <span>Peminjam: <strong className="text-slate-800">{b.userName}</strong></span>
                         {b.equipmentName && (
-                          <span className="inline-flex items-center bg-blue-50 text-[#2A85FF] text-[11px] px-2 py-0.5 rounded-md font-medium">
-                            <Cpu className="w-3 h-3 mr-1" />
+                          <span className="inline-flex items-center bg-white border border-slate-300 text-slate-800 text-[11px] px-2 py-0.5 rounded-md font-medium">
+                            <Cpu className="w-3 h-3 mr-1 text-[#2A85FF]" />
                             {b.equipmentName}
                           </span>
                         )}
@@ -329,11 +329,11 @@ export default function ApprovalPage() {
 
                   <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
                     {b.status === 'disetujui' ? (
-                      <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                      <span className="inline-flex items-center bg-emerald-600 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs">
                         Disetujui
                       </span>
                     ) : (
-                      <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                      <span className="inline-flex items-center bg-rose-600 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs">
                         Ditolak
                       </span>
                     )}

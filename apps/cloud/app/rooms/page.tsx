@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Unlock, AlertCircle, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
+import { Plus, Trash2, Unlock, AlertCircle, CheckCircle2, QrCode, X } from 'lucide-react';
 import { Room } from '@/types';
 
 export default function RoomsPage() {
@@ -18,8 +18,14 @@ export default function RoomsPage() {
   const [code, setCode] = useState('');
   const [capacity, setCapacity] = useState(30);
   const [description, setDescription] = useState('');
-  const [apiKey, setApiKey] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Modal Scan / Verifikasi QR Langsung di Cloud
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [qrRoomCode, setQrRoomCode] = useState('lab-01');
+  const [qrTokenInput, setQrTokenInput] = useState('');
+  const [qrVerifying, setQrVerifying] = useState(false);
+  const [qrResult, setQrResult] = useState<{ action: string; name?: string; reason?: string } | null>(null);
 
   const fetchRooms = async () => {
     try {
@@ -84,10 +90,14 @@ export default function RoomsPage() {
     setSubmitting(true);
     setFeedback(null);
     try {
+      // Generate kunci perangkat secara otomatis (tidak perlu diisi manual oleh admin)
+      const slug = code.toLowerCase().replace(/[^a-z0-9]/g, '') || 'lab';
+      const autoApiKey = `gw_${slug}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+
       const res = await fetch('/api/rooms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, code, capacity, description, apiKey }),
+        body: JSON.stringify({ name, code, capacity, description, apiKey: autoApiKey }),
       });
       const json = await res.json();
       if (json.success) {
@@ -95,7 +105,6 @@ export default function RoomsPage() {
         setName('');
         setCode('');
         setDescription('');
-        setApiKey('');
         fetchRooms();
         setFeedback({ type: 'success', message: json.message });
       } else {
@@ -105,6 +114,29 @@ export default function RoomsPage() {
       setFeedback({ type: 'error', message: 'Gagal menambahkan ruangan' });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleVerifyQr = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setQrVerifying(true);
+    setQrResult(null);
+    try {
+      const res = await fetch('/api/gate/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          room: qrRoomCode,
+          method: 'qr',
+          token: qrTokenInput.trim(),
+        }),
+      });
+      const json = await res.json();
+      setQrResult(json);
+    } catch {
+      setQrResult({ action: 'deny', reason: 'Gagal terhubung ke server' });
+    } finally {
+      setQrVerifying(false);
     }
   };
 
@@ -120,13 +152,26 @@ export default function RoomsPage() {
             Konfigurasi ruangan, kunci API gateway, status gate fisik, dan kendali buka jarak jauh
           </p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn-pill-primary self-start sm:self-auto px-6 py-2.5 text-xs font-semibold flex items-center shadow-sm"
-        >
-          <Plus className="w-4 h-4 mr-1.5" />
-          Tambah Ruangan
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+          <button
+            onClick={() => {
+              setQrResult(null);
+              setQrTokenInput('');
+              setShowQrModal(true);
+            }}
+            className="btn-pill-secondary px-5 py-2.5 text-xs font-semibold flex items-center"
+          >
+            <QrCode className="w-4 h-4 mr-1.5" />
+            Verifikasi Tiket QR
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn-pill-primary px-6 py-2.5 text-xs font-semibold flex items-center shadow-sm"
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            Tambah Ruangan
+          </button>
+        </div>
       </div>
 
       {feedback && (
@@ -178,13 +223,13 @@ export default function RoomsPage() {
                   </div>
 
                   {isOnline ? (
-                    <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+                    <span className="inline-flex items-center bg-emerald-600 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                      <span className="w-2 h-2 rounded-full bg-white mr-1.5 animate-pulse" />
                       Online
                     </span>
                   ) : (
-                    <span className="inline-flex items-center bg-slate-100 text-slate-500 font-semibold px-2.5 py-0.5 rounded-md text-xs">
-                      <span className="w-2 h-2 rounded-full bg-slate-400 mr-1.5" />
+                    <span className="inline-flex items-center bg-slate-200 text-slate-700 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                      <span className="w-2 h-2 rounded-full bg-slate-500 mr-1.5" />
                       Offline
                     </span>
                   )}
@@ -288,18 +333,6 @@ export default function RoomsPage() {
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1.5 text-xs">API Key Gateway (Hash SHA-256)</label>
-                <input
-                  type="text"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="gw_lab04_secret_key_semarang_2026"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:outline-none focus:border-[#2A85FF] focus:ring-2 focus:ring-[#2A85FF]/10 bg-white text-slate-900 transition"
-                  required
-                />
-              </div>
-
-              <div>
                 <label className="block font-medium text-slate-700 mb-1.5 text-xs">Deskripsi & Lokasi</label>
                 <textarea
                   value={description}
@@ -324,6 +357,98 @@ export default function RoomsPage() {
                   className="btn-pill-primary px-6 py-2 text-xs font-semibold shadow-sm"
                 >
                   {submitting ? 'Menyimpan...' : 'Simpan Ruangan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Modal Verifikasi / Scan Tiket QR Langsung di Cloud */}
+      {showQrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-100 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="font-bold text-lg text-slate-900">
+                  Verifikasi Tiket QR
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Tempel token QR tiket mahasiswa untuk validasi akses ruangan
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleVerifyQr} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Ruangan Tujuan</label>
+                <select
+                  value={qrRoomCode}
+                  onChange={(e) => setQrRoomCode(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white text-slate-900 focus:outline-none focus:border-[#2A85FF]"
+                >
+                  {rooms.map((r) => (
+                    <option key={r.id} value={r.code}>
+                      {r.name} ({r.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-medium text-slate-700 mb-1.5 text-xs">Token Tiket QR</label>
+                <textarea
+                  value={qrTokenInput}
+                  onChange={(e) => setQrTokenInput(e.target.value)}
+                  placeholder="eyJhbGciOiJFZERTQSJ9..."
+                  rows={3}
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono bg-white text-slate-900 focus:outline-none focus:border-[#2A85FF]"
+                />
+              </div>
+
+              {qrResult && (
+                <div
+                  className={`p-3.5 rounded-xl text-xs font-semibold flex items-center space-x-2 ${
+                    qrResult.action === 'open'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-rose-600 text-white'
+                  }`}
+                >
+                  {qrResult.action === 'open' ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>AKSES DITERIMA: {qrResult.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>AKSES DITOLAK: {qrResult.reason}</span>
+                    </>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowQrModal(false)}
+                  className="btn-pill-secondary px-5 py-2 text-xs font-semibold"
+                >
+                  Tutup
+                </button>
+                <button
+                  type="submit"
+                  disabled={qrVerifying}
+                  className="btn-pill-primary px-6 py-2 text-xs font-semibold shadow-sm"
+                >
+                  {qrVerifying ? 'Memverifikasi...' : 'Validasi QR'}
                 </button>
               </div>
             </form>

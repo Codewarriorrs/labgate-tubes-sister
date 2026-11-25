@@ -197,8 +197,8 @@ export default function CardsPage() {
                 </div>
 
                 <div className="flex items-center justify-between md:justify-end gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                  <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
-                    Aktif &bull; Sinkron Gateway
+                  <span className="inline-flex items-center bg-emerald-600 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                    Aktif &bull; Terdaftar
                   </span>
                   <button
                     onClick={() => handleDeleteCard(card.id)}

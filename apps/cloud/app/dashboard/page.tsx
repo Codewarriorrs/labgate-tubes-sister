@@ -488,13 +488,13 @@ export default function DashboardPage() {
                     <span className="font-extrabold text-sm text-slate-900">{r.code}</span>
                     {/* Status Badge with Dot Indicator */}
                     {isOnline ? (
-                      <span className="inline-flex items-center space-x-1.5 bg-[#E8FAF0] text-[#10B981] px-2 py-0.5 rounded-md text-xs font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse"></span>
+                      <span className="inline-flex items-center space-x-1.5 bg-emerald-600 text-white px-2.5 py-0.5 rounded-md text-xs font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                         <span>Tersedia</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-xs font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                      <span className="inline-flex items-center space-x-1.5 bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-md text-xs font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
                         <span>Offline</span>
                       </span>
                     )}
@@ -530,7 +530,7 @@ export default function DashboardPage() {
             <h2 className="text-lg font-bold text-slate-900">
               Riwayat Permohonan Peminjaman
             </h2>
-            <span className="bg-blue-50 text-[#2A85FF] font-bold text-xs px-2.5 py-0.5 rounded-md">
+            <span className="bg-slate-900 text-white font-bold text-xs px-2.5 py-0.5 rounded-md">
               {bookings.length}
             </span>
           </div>
@@ -615,8 +615,8 @@ export default function DashboardPage() {
                               Peminjam: <strong className="text-slate-800">{b.userName}</strong>
                             </span>
                             {b.equipmentName && (
-                              <span className="inline-flex items-center bg-blue-50 text-[#2A85FF] text-[11px] px-2 py-0.5 rounded-md font-medium">
-                                <Cpu className="w-3 h-3 mr-1" />
+                              <span className="inline-flex items-center bg-white border border-slate-300 text-slate-800 text-[11px] px-2 py-0.5 rounded-md font-medium">
+                                <Cpu className="w-3 h-3 mr-1 text-[#2A85FF]" />
                                 {b.equipmentName}
                               </span>
                             )}
@@ -639,17 +639,17 @@ export default function DashboardPage() {
                         {/* Status Tag */}
                         <div>
                           {b.status === 'disetujui' && (
-                            <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                            <span className="inline-flex items-center bg-emerald-600 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs">
                               Disetujui
                             </span>
                           )}
                           {b.status === 'menunggu' && (
-                            <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                            <span className="inline-flex items-center bg-amber-500 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs">
                               Menunggu
                             </span>
                           )}
                           {b.status === 'ditolak' && (
-                            <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-200/60 font-semibold px-2.5 py-0.5 rounded-md text-xs">
+                            <span className="inline-flex items-center bg-rose-600 text-white font-semibold px-2.5 py-0.5 rounded-md text-xs">
                               Ditolak
                             </span>
                           )}
