@@ -310,8 +310,9 @@ async function ensureDatabaseSeeded(): Promise<void> {
 
   seedPromise = (async () => {
     try {
-      const { rows } = await pool.query('SELECT COUNT(*)::int AS cnt FROM rooms');
-      if (rows[0]?.cnt === 0) {
+      const { rows: roomRows } = await pool.query('SELECT COUNT(*)::int AS cnt FROM rooms');
+      const { rows: cardRows } = await pool.query('SELECT COUNT(*)::int AS cnt FROM cards');
+      if (roomRows[0]?.cnt === 0 || cardRows[0]?.cnt === 0) {
         for (const u of initialUsers) {
           await pool.query(
             `INSERT INTO users (id, name, email, password_hash, role, department, nim, created_at)
@@ -328,9 +329,9 @@ async function ensureDatabaseSeeded(): Promise<void> {
         }
         for (const eq of initialEquipment) {
           await pool.query(
-            `INSERT INTO equipment (id, room_id, name, category, is_available, created_at)
+            `INSERT INTO equipment (id, room_id, name, code, is_available, created_at)
              VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT DO NOTHING`,
-            [eq.id, eq.roomId, eq.name, 'Peralatan Lab', eq.isAvailable, eq.createdAt]
+            [eq.id, eq.roomId, eq.name, eq.code, eq.isAvailable, eq.createdAt]
           );
         }
         for (const c of initialCards) {
@@ -341,23 +342,27 @@ async function ensureDatabaseSeeded(): Promise<void> {
           );
         }
         for (const b of initialBookings) {
-          let qrToken = b.qrToken || null;
-          if (b.status === 'disetujui' && !qrToken) {
-            qrToken = await signQrTicket({
-              bookingId: b.id,
-              roomId: b.roomId,
-              roomCode: b.roomCode || b.roomId,
-              userId: b.userId,
-              userName: b.userName || 'Mahasiswa',
-              startTime: b.startTime,
-              endTime: b.endTime,
-            });
+          try {
+            let qrToken = b.qrToken || null;
+            if (b.status === 'disetujui' && !qrToken) {
+              qrToken = await signQrTicket({
+                bookingId: b.id,
+                roomId: b.roomId,
+                roomCode: b.roomCode || b.roomId,
+                userId: b.userId,
+                userName: b.userName || 'Mahasiswa',
+                startTime: b.startTime,
+                endTime: b.endTime,
+              });
+            }
+            await pool.query(
+              `INSERT INTO bookings (id, user_id, room_id, equipment_id, purpose, start_time, end_time, status, rejection_reason, qr_token, created_at, updated_at)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING`,
+              [b.id, b.userId, b.roomId, b.equipmentId || null, b.purpose, b.startTime, b.endTime, b.status, b.rejectionReason || null, qrToken, b.createdAt, b.updatedAt]
+            );
+          } catch {
+            // Abaikan jika bentrok dengan booking yang sudah dibuat user
           }
-          await pool.query(
-            `INSERT INTO bookings (id, user_id, room_id, equipment_id, purpose, start_time, end_time, status, rejection_reason, qr_token, created_at, updated_at)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT DO NOTHING`,
-            [b.id, b.userId, b.roomId, b.equipmentId || null, b.purpose, b.startTime, b.endTime, b.status, b.rejectionReason || null, qrToken, b.createdAt, b.updatedAt]
-          );
         }
       }
       dbSeedChecked = true;
@@ -612,6 +617,7 @@ export async function updateRoomHeartbeat(roomId: string, data: { version?: stri
 
 export async function listEquipment(roomId?: string): Promise<Equipment[]> {
   if (pool) {
+    await ensureDatabaseSeeded();
     try {
       const q = roomId ? 'SELECT * FROM equipment WHERE room_id = $1' : 'SELECT * FROM equipment';
       const p = roomId ? [roomId] : [];
@@ -631,6 +637,7 @@ export async function listEquipment(roomId?: string): Promise<Equipment[]> {
 
 export async function listCards(userId?: string): Promise<Card[]> {
   if (pool) {
+    await ensureDatabaseSeeded();
     try {
       const q = userId
         ? `SELECT c.*, u.name as user_name, u.role as user_role FROM cards c JOIN users u ON c.user_id = u.id WHERE c.user_id = $1`
